@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>75 Hard Challenge — Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0a0a0a;
+    --white: #f5f4f0;
+    --cream: #ede9e0;
+    --iron: #1a1a1a;
+    --steel: #2a2a2a;
+    --muted: #6b6b6b;
+    --accent: #c8f53e;
+    --accent-dark: #a8d42e;
+    --red: #ff3b30;
+    --gold: #f5c842;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    overflow-x: hidden;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 48px;
+    background: rgba(10,10,10,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+  }
+  .nav-cta {
+    background: var(--accent);
+    color: var(--black);
+    font-weight: 600;
+    font-size: 13px;
+    padding: 10px 22px;
+    border: none;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .nav-cta:hover { background: var(--accent-dark); transform: translateY(-1px); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 140px 48px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 60% 50% at 70% 40%, rgba(200,245,62,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .hero-eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 32px;
+    height: 1px;
+    background: var(--accent);
+  }
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(72px, 12vw, 160px);
+    line-height: 0.9;
+    letter-spacing: 0.02em;
+    margin-bottom: 32px;
+  }
+  .hero-title span {
+    color: var(--accent);
+    display: block;
+  }
+  .hero-sub {
+    max-width: 520px;
+    font-size: 17px;
+    line-height: 1.7;
+    color: rgba(245,244,240,0.65);
+    margin-bottom: 48px;
+  }
+  .hero-cta-group {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: var(--black);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 16px 36px;
+    border: none;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn-primary:hover { background: var(--accent-dark); transform: translateY(-2px); }
+  .btn-secondary {
+    color: var(--white);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+    border-bottom: 1px solid rgba(255,255,255,0.3);
+    padding-bottom: 2px;
+  }
+  .btn-secondary:hover { opacity: 1; }
+
+  .hero-stats {
+    position: absolute;
+    right: 48px;
+    bottom: 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    text-align: right;
+  }
+  .stat-item { }
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    line-height: 1;
+    color: var(--accent);
+  }
+  .stat-label {
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  /* TICKER */
+  .ticker {
+    background: var(--accent);
+    padding: 14px 0;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .ticker-inner {
+    display: inline-flex;
+    animation: ticker 20s linear infinite;
+    gap: 0;
+  }
+  .ticker-item {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 15px;
+    letter-spacing: 0.15em;
+    color: var(--black);
+    padding: 0 40px;
+  }
+  .ticker-dot {
+    color: rgba(0,0,0,0.3);
+    padding: 0 8px;
+  }
+  @keyframes ticker {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* SECTION */
+  section { padding: 100px 48px; }
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(42px, 6vw, 80px);
+    line-height: 0.95;
+    letter-spacing: 0.02em;
+    margin-bottom: 24px;
+  }
+
+  /* RULES SECTION */
+  .rules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.06);
+    margin-top: 60px;
+  }
+  .rule-card {
+    background: var(--iron);
+    padding: 40px 32px;
+    transition: background 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .rule-card:hover { background: var(--steel); }
+  .rule-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transition: transform 0.3s;
+    transform-origin: left;
+  }
+  .rule-card:hover::before { transform: scaleX(1); }
+  .rule-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 56px;
+    color: rgba(200,245,62,0.12);
+    line-height: 1;
+    margin-bottom: 16px;
+  }
+  .rule-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--white);
+  }
+  .rule-desc {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--muted);
+  }
+  .rule-badge {
+    display: inline-block;
+    background: rgba(200,245,62,0.12);
+    color: var(--accent);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 4px 10px;
+    margin-top: 14px;
+    letter-spacing: 0.08em;
+  }
+
+  /* PROGRAM SECTION */
+  .program-section { background: var(--iron); }
+  .program-tabs {
+    display: flex;
+    gap: 2px;
+    margin-top: 48px;
+    margin-bottom: 2px;
+  }
+  .ptab {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    padding: 12px 24px;
+    background: rgba(255,255,255,0.04);
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+  .ptab.active {
+    background: var(--accent);
+    color: var(--black);
+    font-weight: 600;
+  }
+  .ptab:hover:not(.active) { background: rgba(255,255,255,0.08); color: var(--white); }
+  .program-panel { display: none; }
+  .program-panel.active { display: block; }
+  .exercise-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 2px;
+  }
+  .exercise-table th {
+    text-align: left;
+    padding: 14px 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+    background: rgba(0,0,0,0.3);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .exercise-table td {
+    padding: 18px 20px;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    vertical-align: middle;
+  }
+  .exercise-table tr:hover td { background: rgba(200,245,62,0.03); }
+  .exercise-table tr:last-child td { border-bottom: none; }
+  .ex-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    width: 40px;
+  }
+  .ex-name { font-weight: 500; color: var(--white); }
+  .ex-detail { font-size: 13px; color: var(--muted); margin-top: 3px; }
+  .ex-sets {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  /* TRACKER SECTION */
+  .tracker-section { }
+  .tracker-wrap {
+    margin-top: 60px;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .tracker-header {
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 1px;
+    background: rgba(255,255,255,0.06);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .tracker-stat {
+    background: var(--iron);
+    padding: 28px 24px;
+  }
+  .tracker-stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .tracker-stat-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 42px;
+    line-height: 1;
+    color: var(--accent);
+  }
+  .tracker-body { padding: 32px; }
+  .days-grid-tracker {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    gap: 6px;
+    margin-bottom: 24px;
+  }
+  .day-cell {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-size: 12px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    position: relative;
+  }
+  .day-cell:hover { border-color: rgba(200,245,62,0.3); color: var(--white); }
+  .day-cell.complete { background: rgba(200,245,62,0.12); border-color: rgba(200,245,62,0.4); color: var(--accent); }
+  .day-cell.partial { background: rgba(245,200,66,0.08); border-color: rgba(245,200,66,0.3); color: var(--gold); }
+  .day-cell.selected { border-color: var(--accent); border-width: 2px; }
+  .day-cell-num { font-size: 13px; font-weight: 500; }
+  .day-cell-type { font-size: 9px; letter-spacing: 0.05em; margin-top: 2px; opacity: 0.7; }
+  .detail-panel-tracker {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    padding: 28px;
+    margin-top: 8px;
+  }
+  .detail-day-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .type-pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 4px 12px;
+    letter-spacing: 0.1em;
+  }
+  .pill-push { background: rgba(56,130,221,0.15); color: #85b7eb; }
+  .pill-pull { background: rgba(30,158,117,0.15); color: #5DCAA5; }
+  .pill-leg { background: rgba(216,90,48,0.15); color: #F0997B; }
+  .task-list { display: flex; flex-direction: column; gap: 2px; }
+  .task-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: rgba(0,0,0,0.2);
+    cursor: pointer;
+    transition: background 0.15s;
+    border-left: 3px solid transparent;
+  }
+  .task-item:hover { background: rgba(255,255,255,0.04); }
+  .task-item.done { border-left-color: var(--accent); }
+  .task-check {
+    width: 20px; height: 20px;
+    border: 1.5px solid rgba(255,255,255,0.2);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .task-item.done .task-check {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .check-svg { display: none; width: 12px; height: 12px; }
+  .task-item.done .check-svg { display: block; }
+  .task-name-t { font-size: 14px; color: var(--white); flex: 1; }
+  .task-item.done .task-name-t { color: var(--muted); text-decoration: line-through; }
+  .task-group-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    padding: 16px 16px 8px;
+  }
+  .complete-banner {
+    background: rgba(200,245,62,0.1);
+    border: 1px solid rgba(200,245,62,0.25);
+    color: var(--accent);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 0.1em;
+    text-align: center;
+    padding: 16px;
+    margin-top: 12px;
+  }
+
+  /* FOOTER */
+  footer {
+    background: var(--iron);
+    padding: 48px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .footer-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+  }
+  .footer-note {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-up { animation: fadeUp 0.7s ease forwards; }
+  .delay-1 { animation-delay: 0.1s; opacity: 0; }
+  .delay-2 { animation-delay: 0.25s; opacity: 0; }
+  .delay-3 { animation-delay: 0.4s; opacity: 0; }
+  .delay-4 { animation-delay: 0.55s; opacity: 0; }
+
+  /* SCROLL REVEAL */
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .reveal.visible { opacity: 1; transform: none; }
+
+  /* TODAY HIGHLIGHT */
+  .day-cell.today {
+    border-color: var(--white) !important;
+    border-width: 2px;
+  }
+  .day-cell.today .day-cell-num::after {
+    content: '';
+    display: block;
+    width: 4px; height: 4px;
+    background: var(--white);
+    border-radius: 50%;
+    margin: 2px auto 0;
+  }
+
+  /* SETUP BAR */
+  .setup-bar {
+    background: rgba(200,245,62,0.07);
+    border: 1px solid rgba(200,245,62,0.2);
+    padding: 20px 24px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .setup-bar-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+  .setup-bar p {
+    font-size: 13px;
+    color: var(--muted);
+    flex: 1;
+    min-width: 200px;
+  }
+  .setup-date-input {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: var(--white);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    padding: 8px 14px;
+    outline: none;
+    cursor: pointer;
+  }
+  .setup-date-input:focus { border-color: var(--accent); }
+  .setup-confirm {
+    background: var(--accent);
+    color: var(--black);
+    font-weight: 700;
+    font-size: 12px;
+    padding: 9px 20px;
+    border: none;
+    cursor: pointer;
+    letter-spacing: 0.06em;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .setup-confirm:hover { background: var(--accent-dark); }
+  .setup-reset {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.12);
+    color: var(--muted);
+    font-size: 11px;
+    padding: 9px 16px;
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.06em;
+    transition: all 0.2s;
+  }
+  .setup-reset:hover { border-color: var(--red); color: var(--red); }
+
+  /* NAME EDIT */
+  .name-edit-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 2px 4px;
+    opacity: 0.35;
+    transition: opacity 0.15s;
+    vertical-align: middle;
+    margin-left: 4px;
+  }
+  .name-edit-btn:hover { opacity: 0.9; }
+  .name-edit-btn svg { display: block; }
+
+  @media (max-width: 768px) {
+    nav { padding: 16px 20px; }
+    .hero { padding: 120px 20px 60px; }
+    .hero-stats { position: static; flex-direction: row; margin-top: 48px; }
+    section { padding: 60px 20px; }
+    .tracker-header { grid-template-columns: repeat(2,1fr); }
+    footer { padding: 32px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">75 HARD</div>
+  <a href="#tracker" class="nav-cta">Tracker'ı Aç</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-eyebrow fade-up">Mental dayanıklılık programı</div>
+  <h1 class="hero-title fade-up delay-1">
+    75<br>
+    <span>HARD</span>
+    CHALLENGE
+  </h1>
+  <p class="hero-sub fade-up delay-2">
+    İki eski profesyonel yüzücünün kas kütlesi ve mental güç için tasarlanmış özel programı. 75 gün, sıfır bahane, sıfır istisna.
+  </p>
+  <div class="hero-cta-group fade-up delay-3">
+    <a href="#tracker" class="btn-primary">Tracker'a Git →</a>
+    <a href="#program" class="btn-secondary">Programı gör</a>
+  </div>
+  <div class="hero-stats fade-up delay-4">
+    <div class="stat-item">
+      <div class="stat-num">75</div>
+      <div class="stat-label">gün</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">6</div>
+      <div class="stat-label">günlük görev</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">0</div>
+      <div class="stat-label">bahane</div>
+    </div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner" id="ticker">
+    <span class="ticker-item">SABAH KOŞUSU</span><span class="ticker-dot">·</span>
+    <span class="ticker-item">3.8L SU</span><span class="ticker-dot">·</span>
+    <span class="ticker-item">10 SAYFA KİTAP</span><span class="ticker-dot">·</span>
+    <span class="ticker-item">DİYET</span><span class="ticker-dot">·</span>
+    <span class="ticker-item">FOTOĞRAF</span><span class="ticker-dot">·</span>
+    <span class="ticker-item">SALON ANTRENMANi</span><span class="ticker-dot">·</span>
+    <span class="ticker-item">PUSH — PULL — LEG</span><span class="ticker-dot">·</span>
+    <span class="ticker-item">SABAH KOŞUSU</span><span class="ticker-dot">·</span>
+    <span class="ticker-item">3.8L SU</span><span class="ticker-dot">·</span>
+    <span class="ticker-item">10 SAYFA KİTAP</span><span class="ticker-dot">·</span>
+    <span class="ticker-item">DİYET</span><span class="ticker-dot">·</span>
+    <span class="ticker-item">FOTOĞRAF</span><span class="ticker-dot">·</span>
+    <span class="ticker-item">SALON ANTRENMANi</span><span class="ticker-dot">·</span>
+    <span class="ticker-item">PUSH — PULL — LEG</span><span class="ticker-dot">·</span>
+  </div>
+</div>
+
+<!-- RULES -->
+<section id="kurallar">
+  <div class="section-label reveal">Program kuralları</div>
+  <h2 class="section-title reveal">6 KURAL.<br>HER GÜN.</h2>
+  <div class="rules-grid reveal">
+    <div class="rule-card">
+      <div class="rule-num">01</div>
+      <div class="rule-title">Sabah koşusu</div>
+      <div class="rule-desc">En az 45 dakika. Mutlaka açık havada. Yağmur, rüzgar, bahane geçersiz.</div>
+      <div class="rule-badge">45+ dk · dışarı</div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-num">02</div>
+      <div class="rule-title">3.8 litre su</div>
+      <div class="rule-desc">Günde minimum 3.8 litre su. Kafein ve alkollü içecekler sayılmaz.</div>
+      <div class="rule-badge">3800 ml</div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-num">03</div>
+      <div class="rule-title">10 sayfa kitap</div>
+      <div class="rule-desc">Kişisel gelişim odaklı kitap. Sesli kitap geçersiz. Minimum 10 sayfa.</div>
+      <div class="rule-badge">non-fiction</div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-num">04</div>
+      <div class="rule-title">Diyete uymak</div>
+      <div class="rule-desc">Seçtiğin diyete sıkı sıkıya uymak. Alkol yok. Cheat meal yok.</div>
+      <div class="rule-badge">sıfır istisna</div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-num">05</div>
+      <div class="rule-title">İlerleme fotoğrafı</div>
+      <div class="rule-desc">Her gün bir fotoğraf. Süreci belgele, dönüşümü gör.</div>
+      <div class="rule-badge">her gün</div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-num">06</div>
+      <div class="rule-title">Akşam antrenmanı</div>
+      <div class="rule-desc">Push / Pull / Leg döngüsü. Tam donanımlı spor salonu. 45+ dakika.</div>
+      <div class="rule-badge">PPL · salon</div>
+    </div>
+  </div>
+</section>
+
+<!-- PROGRAM -->
+<section id="program" class="program-section">
+  <div class="section-label reveal">Akşam antrenman programı</div>
+  <h2 class="section-title reveal">PUSH · PULL<br>· LEG</h2>
+  <p class="reveal" style="color:var(--muted); font-size:15px; max-width:480px; line-height:1.7; margin-top:12px;">
+    Eski profesyonel yüzücü altyapısıyla tasarlandı. Yüksek hacim, ileri seviye, kas kütlesi odaklı.
+  </p>
+  <div class="program-tabs reveal">
+    <button class="ptab active" onclick="showTab('push')">Push</button>
+    <button class="ptab" onclick="showTab('pull')">Pull</button>
+    <button class="ptab" onclick="showTab('leg')">Leg</button>
+  </div>
+  <div id="tab-push" class="program-panel active reveal">
+    <table class="exercise-table">
+      <thead><tr><th>#</th><th>Egzersiz</th><th>Setler</th></tr></thead>
+      <tbody>
+        <tr><td class="ex-num">01</td><td><div class="ex-name">Bench Press (düz barbell)</div><div class="ex-detail">Ana güç hareketi — ağır, dinlenmeli</div></td><td class="ex-sets">5×5</td></tr>
+        <tr><td class="ex-num">02</td><td><div class="ex-name">İncline Dumbbell Press</div><div class="ex-detail">Üst göğüs vurgusu</div></td><td class="ex-sets">4×8-10</td></tr>
+        <tr><td class="ex-num">03</td><td><div class="ex-name">Cable Fly / Pec Deck</div><div class="ex-detail">İzolasyon, kasılmaya odaklan</div></td><td class="ex-sets">3×12</td></tr>
+        <tr><td class="ex-num">04</td><td><div class="ex-name">Overhead Press (barbell)</div><div class="ex-detail">Omuz ana hareketi</div></td><td class="ex-sets">4×6-8</td></tr>
+        <tr><td class="ex-num">05</td><td><div class="ex-name">Lateral Raise</div><div class="ex-detail">Orta delt — kontrollü, hafif</div></td><td class="ex-sets">4×15</td></tr>
+        <tr><td class="ex-num">06</td><td><div class="ex-name">Skull Crusher</div><div class="ex-detail">Triceps uzun baş</div></td><td class="ex-sets">3×10</td></tr>
+        <tr><td class="ex-num">07</td><td><div class="ex-name">Triceps Pushdown</div><div class="ex-detail">Bitiş izolasyonu</div></td><td class="ex-sets">3×12</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div id="tab-pull" class="program-panel">
+    <table class="exercise-table">
+      <thead><tr><th>#</th><th>Egzersiz</th><th>Setler</th></tr></thead>
+      <tbody>
+        <tr><td class="ex-num">01</td><td><div class="ex-name">Deadlift</div><div class="ex-detail">Ana güç hareketi — maksimal</div></td><td class="ex-sets">5×3-5</td></tr>
+        <tr><td class="ex-num">02</td><td><div class="ex-name">Weighted Pull-up</div><div class="ex-detail">Ağırlıklı, latissimus vurgusu</div></td><td class="ex-sets">4×6-8</td></tr>
+        <tr><td class="ex-num">03</td><td><div class="ex-name">Barbell Row</div><div class="ex-detail">Kalın sırt kütlesi için</div></td><td class="ex-sets">4×8</td></tr>
+        <tr><td class="ex-num">04</td><td><div class="ex-name">Seated Cable Row</div><div class="ex-detail">Orta sırt izolasyonu</div></td><td class="ex-sets">3×10-12</td></tr>
+        <tr><td class="ex-num">05</td><td><div class="ex-name">Face Pull</div><div class="ex-detail">Arka delt + rotator cuff sağlığı</div></td><td class="ex-sets">3×15</td></tr>
+        <tr><td class="ex-num">06</td><td><div class="ex-name">Barbell Curl</div><div class="ex-detail">Biceps ana hareketi</div></td><td class="ex-sets">3×10</td></tr>
+        <tr><td class="ex-num">07</td><td><div class="ex-name">Hammer Curl</div><div class="ex-detail">Brachialis + ön kol</div></td><td class="ex-sets">3×12</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div id="tab-leg" class="program-panel">
+    <table class="exercise-table">
+      <thead><tr><th>#</th><th>Egzersiz</th><th>Setler</th></tr></thead>
+      <tbody>
+        <tr><td class="ex-num">01</td><td><div class="ex-name">Back Squat</div><div class="ex-detail">Ana güç hareketi — derine in</div></td><td class="ex-sets">5×5</td></tr>
+        <tr><td class="ex-num">02</td><td><div class="ex-name">Romanian Deadlift</div><div class="ex-detail">Hamstring ve glute odaklı</div></td><td class="ex-sets">4×8-10</td></tr>
+        <tr><td class="ex-num">03</td><td><div class="ex-name">Leg Press</div><div class="ex-detail">Hacim için, ayak pozisyonu değiştir</div></td><td class="ex-sets">3×12</td></tr>
+        <tr><td class="ex-num">04</td><td><div class="ex-name">Walking Lunge</div><div class="ex-detail">Denge + tek taraflı kuvvet</div></td><td class="ex-sets">3×12/bacak</td></tr>
+        <tr><td class="ex-num">05</td><td><div class="ex-name">Leg Curl (machine)</div><div class="ex-detail">Hamstring izolasyonu</div></td><td class="ex-sets">3×12</td></tr>
+        <tr><td class="ex-num">06</td><td><div class="ex-name">Leg Extension</div><div class="ex-detail">Quad izolasyonu</div></td><td class="ex-sets">3×15</td></tr>
+        <tr><td class="ex-num">07</td><td><div class="ex-name">Standing Calf Raise</div><div class="ex-detail">Gastrocnemius için derin iniş</div></td><td class="ex-sets">4×20</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- TRACKER -->
+<section id="tracker">
+  <div class="section-label reveal">İlerleme takibi</div>
+  <h2 class="section-title reveal">75 GÜN<br>TRACKER</h2>
+
+  <!-- setup bar -->
+  <div class="setup-bar reveal" id="setup-bar">
+    <span class="setup-bar-label">Başlangıç</span>
+    <p>Challengeın başladığı tarihi seç — her günün tarihi ve "bugün" otomatik hesaplanır.</p>
+    <input type="date" class="setup-date-input" id="start-date-input">
+    <button class="setup-confirm" onclick="confirmStartDate()">Kaydet</button>
+    <button class="setup-reset" id="reset-btn" onclick="resetStartDate()" style="display:none">Tarihi Sıfırla</button>
+  </div>
+
+  <!-- person switch -->
+  <div style="display:flex; gap:8px; margin-top:16px; margin-bottom:0; align-items:center;" class="reveal">
+    <button class="ptab active" onclick="switchPerson(0,this)" id="p0btn">
+      <span id="p0name">Kişi 1</span>
+      <button class="name-edit-btn" onclick="event.stopPropagation(); editName(0)" title="İsmi düzenle">
+        <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M8.5 1.5l2 2L4 10H2v-2L8.5 1.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+      </button>
+    </button>
+    <button class="ptab" onclick="switchPerson(1,this)" id="p1btn">
+      <span id="p1name">Kişi 2</span>
+      <button class="name-edit-btn" onclick="event.stopPropagation(); editName(1)" title="İsmi düzenle">
+        <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M8.5 1.5l2 2L4 10H2v-2L8.5 1.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+      </button>
+    </button>
+  </div>
+
+  <div class="tracker-wrap reveal">
+    <div class="tracker-header">
+      <div class="tracker-stat"><div class="tracker-stat-label">Tamamlanan</div><div class="tracker-stat-val" id="t-complete">0</div></div>
+      <div class="tracker-stat"><div class="tracker-stat-label">Kalan</div><div class="tracker-stat-val" id="t-left">75</div></div>
+      <div class="tracker-stat"><div class="tracker-stat-label">Seri</div><div class="tracker-stat-val" id="t-streak">0</div></div>
+      <div class="tracker-stat"><div class="tracker-stat-label">İlerleme</div><div class="tracker-stat-val" id="t-pct">0%</div></div>
+    </div>
+    <div class="tracker-body">
+      <div class="days-grid-tracker" id="days-grid"></div>
+      <div class="detail-panel-tracker" id="detail-panel"></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">75 HARD</div>
+  <div class="footer-note">Başlarsan bitirirsin. Bir gün kaçırırsan sıfırdan başlarsın.</div>
+</footer>
+
+<script>
+const SCHEDULE = ['Push','Pull','Leg','Push','Pull','Leg','Push'];
+const TASKS = [
+  {id:'run', label:'Sabah koşusu (45+ dk, açık hava)', group:'sabah'},
+  {id:'water', label:'3.8 litre su', group:'gün'},
+  {id:'book', label:'10 sayfa kitap', group:'gün'},
+  {id:'diet', label:'Diyete uymak', group:'gün'},
+  {id:'photo', label:'İlerleme fotoğrafı', group:'gün'},
+  {id:'gym', label:'Akşam antrenmanı (45+ dk)', group:'akşam'},
+];
+
+let persons = [
+  JSON.parse(localStorage.getItem('h75p0') || '{}'),
+  JSON.parse(localStorage.getItem('h75p1') || '{}'),
+];
+let names = JSON.parse(localStorage.getItem('h75names') || '["Kişi 1","Kişi 2"]');
+let startDate = localStorage.getItem('h75start') || null;
+let currentPerson = 0;
+let selectedDay = 0;
+
+/* ── Tarih yardımcıları ── */
+function getTodayIdx() {
+  if (!startDate) return -1;
+  const start = new Date(startDate);
+  start.setHours(0,0,0,0);
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const diff = Math.floor((today - start) / 86400000);
+  return (diff >= 0 && diff < 75) ? diff : -1;
+}
+
+function dayLabel(i) {
+  if (!startDate) return `Gün ${i+1}`;
+  const d = new Date(startDate);
+  d.setDate(d.getDate() + i);
+  return d.toLocaleDateString('tr-TR', {day:'numeric', month:'short'});
+}
+
+/* ── Başlangıç tarihi UI ── */
+function initSetupBar() {
+  const bar = document.getElementById('setup-bar');
+  const input = document.getElementById('start-date-input');
+  const resetBtn = document.getElementById('reset-btn');
+  if (startDate) {
+    input.value = startDate;
+    resetBtn.style.display = '';
+    bar.style.background = 'rgba(255,255,255,0.03)';
+    bar.style.borderColor = 'rgba(255,255,255,0.06)';
+    bar.querySelector('p').textContent = `Challenge başlangıcı: ${new Date(startDate).toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'})}`;
+  } else {
+    resetBtn.style.display = 'none';
+  }
+}
+
+function confirmStartDate() {
+  const val = document.getElementById('start-date-input').value;
+  if (!val) return;
+  startDate = val;
+  localStorage.setItem('h75start', val);
+  const todayIdx = getTodayIdx();
+  if (todayIdx >= 0) selectedDay = todayIdx;
+  initSetupBar();
+  render();
+}
+
+function resetStartDate() {
+  if (!confirm('Başlangıç tarihini sıfırlamak istediğinizden emin misiniz?')) return;
+  startDate = null;
+  localStorage.removeItem('h75start');
+  document.getElementById('start-date-input').value = '';
+  initSetupBar();
+  render();
+}
+
+/* ── İsim düzenleme ── */
+function editName(p) {
+  const current = names[p];
+  const val = prompt(`${p === 0 ? 'Birinci' : 'İkinci'} kişinin adı:`, current);
+  if (val && val.trim()) {
+    names[p] = val.trim();
+    localStorage.setItem('h75names', JSON.stringify(names));
+    updateNameLabels();
+  }
+}
+
+function updateNameLabels() {
+  document.getElementById('p0name').textContent = names[0];
+  document.getElementById('p1name').textContent = names[1];
+}
+
+/* ── Veri ── */
+function save() {
+  localStorage.setItem(`h75p${currentPerson}`, JSON.stringify(persons[currentPerson]));
+}
+
+function getState() { return persons[currentPerson]; }
+
+function dayProgress(i) {
+  const d = getState()[i] || {};
+  const done = TASKS.filter(t => d[t.id]).length;
+  return { done, total: TASKS.length };
+}
+
+function isComplete(i) { return dayProgress(i).done === TASKS.length; }
+
+function getStreak() {
+  let s = 0;
+  for (let i = 74; i >= 0; i--) {
+    if (isComplete(i)) s++; else break;
+  }
+  return s;
+}
+
+/* ── Render ── */
+function updateStats() {
+  const complete = Array.from({length:75},(_,i)=>isComplete(i)).filter(Boolean).length;
+  document.getElementById('t-complete').textContent = complete;
+  document.getElementById('t-left').textContent = 75 - complete;
+  document.getElementById('t-streak').textContent = getStreak();
+  document.getElementById('t-pct').textContent = Math.round(complete/75*100) + '%';
+}
+
+function renderGrid() {
+  const todayIdx = getTodayIdx();
+  const grid = document.getElementById('days-grid');
+  grid.innerHTML = Array.from({length:75},(_,i) => {
+    const p = dayProgress(i);
+    const cls = isComplete(i) ? 'complete' : p.done > 0 ? 'partial' : '';
+    const sel = i === selectedDay ? 'selected' : '';
+    const tod = i === todayIdx ? 'today' : '';
+    const subtitle = startDate ? dayLabel(i) : SCHEDULE[i%7].slice(0,3);
+    return `<div class="day-cell ${cls} ${sel} ${tod}" onclick="selectDay(${i})" title="${startDate ? dayLabel(i)+' · ' : ''}${SCHEDULE[i%7]}">
+      <div class="day-cell-num">${i+1}</div>
+      <div class="day-cell-type">${subtitle}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderDetail() {
+  const i = selectedDay;
+  const type = SCHEDULE[i%7];
+  const state = getState()[i] || {};
+  const pillCls = `pill-${type.toLowerCase()}`;
+  const groups = ['sabah','gün','akşam'];
+  const groupLabels = {sabah:'Sabah',gün:'Gün boyu',akşam:'Akşam'};
+  const todayBadge = i === getTodayIdx() ? ' <span style="font-family:\'DM Mono\',monospace;font-size:11px;color:var(--white);background:rgba(255,255,255,0.1);padding:3px 10px;letter-spacing:0.08em;">BUGÜN</span>' : '';
+  const dateLine = startDate ? `<div style="font-family:\'DM Mono\',monospace;font-size:11px;color:var(--muted);margin-bottom:16px;letter-spacing:0.08em;">${dayLabel(i)}</div>` : '';
+  let html = `<div class="detail-day-title">Gün ${i+1}${todayBadge} <span class="type-pill ${pillCls}">${type.toUpperCase()}</span></div>${dateLine}<div class="task-list">`;
+  groups.forEach(g => {
+    html += `<div class="task-group-label">${groupLabels[g]}</div>`;
+    TASKS.filter(t=>t.group===g).forEach(t => {
+      const done = state[t.id] ? 'done' : '';
+      html += `<div class="task-item ${done}" onclick="toggleTask(${i},'${t.id}')">
+        <div class="task-check">
+          <svg class="check-svg" viewBox="0 0 12 12" fill="none">
+            <path d="M2 6l3 3 5-5" stroke="#0a0a0a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="task-name-t">${t.label}</span>
+      </div>`;
+    });
+  });
+  html += '</div>';
+  if (isComplete(i)) html += `<div class="complete-banner">GÜN TAMAMLANDI</div>`;
+  document.getElementById('detail-panel').innerHTML = html;
+}
+
+function selectDay(i) { selectedDay = i; render(); }
+
+function toggleTask(day, taskId) {
+  if (!persons[currentPerson][day]) persons[currentPerson][day] = {};
+  persons[currentPerson][day][taskId] = !persons[currentPerson][day][taskId];
+  save();
+  render();
+}
+
+function render() { updateStats(); renderGrid(); renderDetail(); }
+
+function switchPerson(p, btn) {
+  currentPerson = p;
+  document.querySelectorAll('#p0btn,#p1btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function showTab(t) {
+  document.querySelectorAll('.program-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.ptab').forEach(b => b.classList.remove('active'));
+  document.getElementById(`tab-${t}`).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// Scroll reveal
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, {threshold: 0.1});
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+// Init
+updateNameLabels();
+initSetupBar();
+const todayInit = getTodayIdx();
+if (todayInit >= 0) selectedDay = todayInit;
+render();
+</script>
+</body>
+</html>
