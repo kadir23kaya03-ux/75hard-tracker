@@ -580,6 +580,81 @@
   }
   .setup-reset:hover { border-color: var(--red); color: var(--red); }
 
+  /* FIREBASE PANEL */
+  .firebase-bar {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+    padding: 20px 24px;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .sync-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+    background: var(--muted);
+    transition: background 0.3s;
+  }
+  .sync-dot.on { background: var(--accent); animation: pulse 2s infinite; }
+  .sync-dot.err { background: var(--red); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .firebase-url-input {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: var(--white);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    padding: 8px 12px;
+    outline: none;
+    flex: 1;
+    min-width: 240px;
+  }
+  .firebase-url-input:focus { border-color: var(--accent); }
+  .firebase-url-input::placeholder { color: var(--muted); }
+  .help-toggle {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .help-toggle:hover { border-color: rgba(255,255,255,0.25); color: var(--white); }
+  .firebase-help {
+    display: none;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.06);
+    padding: 20px 24px;
+    margin-bottom: 4px;
+  }
+  .firebase-help.open { display: block; }
+  .firebase-help ol {
+    margin: 10px 0 0 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .firebase-help li {
+    font-size: 13px;
+    line-height: 1.6;
+    color: rgba(245,244,240,0.65);
+  }
+  .firebase-help li strong { color: var(--white); }
+  .firebase-help code {
+    background: rgba(255,255,255,0.08);
+    padding: 1px 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+  }
+
   /* NAME EDIT */
   .name-edit-btn {
     background: transparent;
@@ -767,6 +842,28 @@
   <div class="section-label reveal">İlerleme takibi</div>
   <h2 class="section-title reveal">75 GÜN<br>TRACKER</h2>
 
+  <!-- firebase help -->
+  <div class="firebase-help reveal" id="firebase-help">
+    <div class="section-label" style="margin-bottom:10px;">Firebase nasıl kurulur? (5 dakika, ücretsiz)</div>
+    <ol>
+      <li><strong>1.</strong> <a href="https://console.firebase.google.com" target="_blank" style="color:var(--accent)">console.firebase.google.com</a> adresine git → <strong>Proje oluştur</strong> → bir isim ver → devam et (Analytics'i kapatabilirsin)</li>
+      <li><strong>2.</strong> Sol menüden <strong>Build → Realtime Database</strong> → <strong>Veritabanı oluştur</strong> → <em>Test modu</em> seç → Bitti</li>
+      <li><strong>3.</strong> <strong>Kurallar</strong> sekmesine tıkla → şunu yapıştır ve yayımla:<br><code>{ "rules": { ".read": true, ".write": true } }</code></li>
+      <li><strong>4.</strong> <strong>Veri</strong> sekmesine dön → üstteki URL'yi kopyala<br><code>https://proje-adın-default-rtdb.firebaseio.com</code></li>
+      <li><strong>5.</strong> O URL'yi aşağıdaki alana yapıştır → <em>Bağlan</em> → arkadaşına aynı URL'yi gönder</li>
+    </ol>
+  </div>
+
+  <!-- firebase bar -->
+  <div class="firebase-bar reveal" id="firebase-bar">
+    <span class="setup-bar-label" style="white-space:nowrap;">Sync</span>
+    <span id="sync-status" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);white-space:nowrap;"><span class="sync-dot" id="sync-dot"></span>Bağlı değil</span>
+    <input type="url" class="firebase-url-input" id="firebase-url-input" placeholder="https://projen-default-rtdb.firebaseio.com">
+    <button class="setup-confirm" onclick="connectFirebase()">Bağlan</button>
+    <button class="setup-reset" id="firebase-disconnect-btn" onclick="disconnectFirebase()" style="display:none">Kes</button>
+    <button class="help-toggle" onclick="toggleFirebaseHelp()">Nasıl kurulur? →</button>
+  </div>
+
   <!-- setup bar -->
   <div class="setup-bar reveal" id="setup-bar">
     <span class="setup-bar-label">Başlangıç</span>
@@ -814,52 +911,157 @@
 <script>
 const SCHEDULE = ['Push','Pull','Leg','Push','Pull','Leg','Push'];
 const TASKS = [
-  {id:'run', label:'Sabah koşusu (45+ dk, açık hava)', group:'sabah'},
-  {id:'water', label:'3.8 litre su', group:'gün'},
-  {id:'book', label:'10 sayfa kitap', group:'gün'},
-  {id:'diet', label:'Diyete uymak', group:'gün'},
-  {id:'photo', label:'İlerleme fotoğrafı', group:'gün'},
-  {id:'gym', label:'Akşam antrenmanı (45+ dk)', group:'akşam'},
+  {id:'run',   label:'Sabah koşusu (45+ dk, açık hava)', group:'sabah'},
+  {id:'water', label:'3.8 litre su',                     group:'gün'},
+  {id:'book',  label:'10 sayfa kitap',                   group:'gün'},
+  {id:'diet',  label:'Diyete uymak',                     group:'gün'},
+  {id:'photo', label:'İlerleme fotoğrafı',               group:'gün'},
+  {id:'gym',   label:'Akşam antrenmanı (45+ dk)',        group:'akşam'},
 ];
 
-let persons = [
-  JSON.parse(localStorage.getItem('h75p0') || '{}'),
-  JSON.parse(localStorage.getItem('h75p1') || '{}'),
-];
-let names = JSON.parse(localStorage.getItem('h75names') || '["Kişi 1","Kişi 2"]');
+let persons   = [JSON.parse(localStorage.getItem('h75p0')||'{}'), JSON.parse(localStorage.getItem('h75p1')||'{}')];
+let names     = JSON.parse(localStorage.getItem('h75names') || '["Kişi 1","Kişi 2"]');
 let startDate = localStorage.getItem('h75start') || null;
+let fbUrl     = localStorage.getItem('h75fb')    || '';
 let currentPerson = 0;
-let selectedDay = 0;
+let selectedDay   = 0;
+let syncTimer     = null;
+let isSaving      = false;
 
-/* ── Tarih yardımcıları ── */
+/* ── Firebase REST ── */
+function fbPath(path) { return `${fbUrl}/h75/${path}.json`; }
+
+async function fbWrite(path, data) {
+  if (!fbUrl) return;
+  await fetch(fbPath(path), {
+    method: 'PUT',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(data)
+  });
+}
+
+async function fbPatch(path, data) {
+  if (!fbUrl) return;
+  await fetch(fbPath(path), {
+    method: 'PATCH',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(data)
+  });
+}
+
+async function fbRead(path) {
+  if (!fbUrl) return null;
+  const r = await fetch(fbPath(path));
+  if (!r.ok) return null;
+  return r.json();
+}
+
+async function syncUp() {
+  if (!fbUrl || isSaving) return;
+  isSaving = true;
+  try {
+    await Promise.all([
+      fbWrite(`p${currentPerson}`, persons[currentPerson]),
+      fbPatch('meta', { names, startDate })
+    ]);
+    setSyncStatus('on');
+  } catch(e) { setSyncStatus('err'); }
+  isSaving = false;
+}
+
+async function syncDown() {
+  if (!fbUrl) return;
+  try {
+    const data = await fbRead('');
+    if (!data) return;
+    if (data.p0) { persons[0]=data.p0; localStorage.setItem('h75p0', JSON.stringify(data.p0)); }
+    if (data.p1) { persons[1]=data.p1; localStorage.setItem('h75p1', JSON.stringify(data.p1)); }
+    if (data.meta) {
+      if (data.meta.names)     { names=data.meta.names; localStorage.setItem('h75names', JSON.stringify(names)); }
+      if (data.meta.startDate) { startDate=data.meta.startDate; localStorage.setItem('h75start', startDate); }
+    }
+    updateNameLabels();
+    initSetupBar();
+    render();
+    setSyncStatus('on');
+  } catch(e) { setSyncStatus('err'); }
+}
+
+function setSyncStatus(state) {
+  const dot = document.getElementById('sync-dot');
+  const txt = document.getElementById('sync-status');
+  dot.className = 'sync-dot' + (state==='on' ? ' on' : state==='err' ? ' err' : '');
+  txt.innerHTML = `<span class="sync-dot ${state==='on'?'on':state==='err'?'err':''}" id="sync-dot"></span>`
+    + (state==='on' ? 'Bağlı — eşzamanlanıyor' : state==='err' ? 'Bağlantı hatası' : 'Bağlı değil');
+}
+
+function startSyncTimer() {
+  if (syncTimer) clearInterval(syncTimer);
+  if (fbUrl) syncTimer = setInterval(syncDown, 8000);
+}
+
+/* ── Firebase UI ── */
+function connectFirebase() {
+  const val = document.getElementById('firebase-url-input').value.trim().replace(/\/+$/, '');
+  if (!val.startsWith('https://')) { alert('Geçerli bir Firebase URL girin.\nÖrnek: https://proje-default-rtdb.firebaseio.com'); return; }
+  fbUrl = val;
+  localStorage.setItem('h75fb', fbUrl);
+  initFirebaseBar();
+  syncDown();
+  startSyncTimer();
+}
+
+function disconnectFirebase() {
+  fbUrl = '';
+  localStorage.removeItem('h75fb');
+  if (syncTimer) clearInterval(syncTimer);
+  initFirebaseBar();
+}
+
+function initFirebaseBar() {
+  const input = document.getElementById('firebase-url-input');
+  const disBtn = document.getElementById('firebase-disconnect-btn');
+  if (fbUrl) {
+    input.value = fbUrl;
+    disBtn.style.display = '';
+    setSyncStatus('on');
+  } else {
+    disBtn.style.display = 'none';
+    setSyncStatus('off');
+  }
+}
+
+function toggleFirebaseHelp() {
+  document.getElementById('firebase-help').classList.toggle('open');
+}
+
+/* ── Başlangıç tarihi ── */
 function getTodayIdx() {
   if (!startDate) return -1;
-  const start = new Date(startDate);
-  start.setHours(0,0,0,0);
-  const today = new Date();
-  today.setHours(0,0,0,0);
+  const start = new Date(startDate); start.setHours(0,0,0,0);
+  const today = new Date();          today.setHours(0,0,0,0);
   const diff = Math.floor((today - start) / 86400000);
   return (diff >= 0 && diff < 75) ? diff : -1;
 }
 
 function dayLabel(i) {
-  if (!startDate) return `Gün ${i+1}`;
+  if (!startDate) return SCHEDULE[i%7].slice(0,3);
   const d = new Date(startDate);
   d.setDate(d.getDate() + i);
   return d.toLocaleDateString('tr-TR', {day:'numeric', month:'short'});
 }
 
-/* ── Başlangıç tarihi UI ── */
 function initSetupBar() {
-  const bar = document.getElementById('setup-bar');
-  const input = document.getElementById('start-date-input');
+  const input    = document.getElementById('start-date-input');
   const resetBtn = document.getElementById('reset-btn');
+  const bar      = document.getElementById('setup-bar');
   if (startDate) {
     input.value = startDate;
     resetBtn.style.display = '';
-    bar.style.background = 'rgba(255,255,255,0.03)';
-    bar.style.borderColor = 'rgba(255,255,255,0.06)';
-    bar.querySelector('p').textContent = `Challenge başlangıcı: ${new Date(startDate).toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'})}`;
+    bar.style.background   = 'rgba(255,255,255,0.03)';
+    bar.style.borderColor  = 'rgba(255,255,255,0.06)';
+    bar.querySelector('p').textContent =
+      `Başlangıç: ${new Date(startDate).toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'})}`;
   } else {
     resetBtn.style.display = 'none';
   }
@@ -870,9 +1072,10 @@ function confirmStartDate() {
   if (!val) return;
   startDate = val;
   localStorage.setItem('h75start', val);
-  const todayIdx = getTodayIdx();
-  if (todayIdx >= 0) selectedDay = todayIdx;
+  const ti = getTodayIdx();
+  if (ti >= 0) selectedDay = ti;
   initSetupBar();
+  syncUp();
   render();
 }
 
@@ -887,12 +1090,12 @@ function resetStartDate() {
 
 /* ── İsim düzenleme ── */
 function editName(p) {
-  const current = names[p];
-  const val = prompt(`${p === 0 ? 'Birinci' : 'İkinci'} kişinin adı:`, current);
+  const val = prompt(`${p===0?'Birinci':'İkinci'} kişinin adı:`, names[p]);
   if (val && val.trim()) {
     names[p] = val.trim();
     localStorage.setItem('h75names', JSON.stringify(names));
     updateNameLabels();
+    syncUp();
   }
 }
 
@@ -904,23 +1107,21 @@ function updateNameLabels() {
 /* ── Veri ── */
 function save() {
   localStorage.setItem(`h75p${currentPerson}`, JSON.stringify(persons[currentPerson]));
+  syncUp();
 }
 
 function getState() { return persons[currentPerson]; }
 
 function dayProgress(i) {
   const d = getState()[i] || {};
-  const done = TASKS.filter(t => d[t.id]).length;
-  return { done, total: TASKS.length };
+  return { done: TASKS.filter(t => d[t.id]).length, total: TASKS.length };
 }
 
 function isComplete(i) { return dayProgress(i).done === TASKS.length; }
 
 function getStreak() {
   let s = 0;
-  for (let i = 74; i >= 0; i--) {
-    if (isComplete(i)) s++; else break;
-  }
+  for (let i = 74; i >= 0; i--) { if (isComplete(i)) s++; else break; }
   return s;
 }
 
@@ -928,47 +1129,46 @@ function getStreak() {
 function updateStats() {
   const complete = Array.from({length:75},(_,i)=>isComplete(i)).filter(Boolean).length;
   document.getElementById('t-complete').textContent = complete;
-  document.getElementById('t-left').textContent = 75 - complete;
-  document.getElementById('t-streak').textContent = getStreak();
-  document.getElementById('t-pct').textContent = Math.round(complete/75*100) + '%';
+  document.getElementById('t-left').textContent     = 75 - complete;
+  document.getElementById('t-streak').textContent   = getStreak();
+  document.getElementById('t-pct').textContent      = Math.round(complete/75*100) + '%';
 }
 
 function renderGrid() {
-  const todayIdx = getTodayIdx();
+  const ti   = getTodayIdx();
   const grid = document.getElementById('days-grid');
   grid.innerHTML = Array.from({length:75},(_,i) => {
-    const p = dayProgress(i);
+    const p   = dayProgress(i);
     const cls = isComplete(i) ? 'complete' : p.done > 0 ? 'partial' : '';
     const sel = i === selectedDay ? 'selected' : '';
-    const tod = i === todayIdx ? 'today' : '';
-    const subtitle = startDate ? dayLabel(i) : SCHEDULE[i%7].slice(0,3);
-    return `<div class="day-cell ${cls} ${sel} ${tod}" onclick="selectDay(${i})" title="${startDate ? dayLabel(i)+' · ' : ''}${SCHEDULE[i%7]}">
+    const tod = i === ti ? 'today' : '';
+    return `<div class="day-cell ${cls} ${sel} ${tod}" onclick="selectDay(${i})" title="${dayLabel(i)} · ${SCHEDULE[i%7]}">
       <div class="day-cell-num">${i+1}</div>
-      <div class="day-cell-type">${subtitle}</div>
+      <div class="day-cell-type">${dayLabel(i)}</div>
     </div>`;
   }).join('');
 }
 
 function renderDetail() {
-  const i = selectedDay;
-  const type = SCHEDULE[i%7];
-  const state = getState()[i] || {};
+  const i       = selectedDay;
+  const type    = SCHEDULE[i%7];
+  const state   = getState()[i] || {};
   const pillCls = `pill-${type.toLowerCase()}`;
+  const todayBadge = i === getTodayIdx()
+    ? ' <span style="font-family:\'DM Mono\',monospace;font-size:11px;color:var(--white);background:rgba(255,255,255,0.1);padding:3px 10px;letter-spacing:0.08em;">BUGÜN</span>' : '';
+  const dateLine = startDate
+    ? `<div style="font-family:\'DM Mono\',monospace;font-size:11px;color:var(--muted);margin-bottom:16px;letter-spacing:0.08em;">${new Date(new Date(startDate).setDate(new Date(startDate).getDate()+i)).toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long'})}</div>` : '';
   const groups = ['sabah','gün','akşam'];
-  const groupLabels = {sabah:'Sabah',gün:'Gün boyu',akşam:'Akşam'};
-  const todayBadge = i === getTodayIdx() ? ' <span style="font-family:\'DM Mono\',monospace;font-size:11px;color:var(--white);background:rgba(255,255,255,0.1);padding:3px 10px;letter-spacing:0.08em;">BUGÜN</span>' : '';
-  const dateLine = startDate ? `<div style="font-family:\'DM Mono\',monospace;font-size:11px;color:var(--muted);margin-bottom:16px;letter-spacing:0.08em;">${dayLabel(i)}</div>` : '';
+  const groupLabels = {sabah:'Sabah', gün:'Gün boyu', akşam:'Akşam'};
   let html = `<div class="detail-day-title">Gün ${i+1}${todayBadge} <span class="type-pill ${pillCls}">${type.toUpperCase()}</span></div>${dateLine}<div class="task-list">`;
   groups.forEach(g => {
     html += `<div class="task-group-label">${groupLabels[g]}</div>`;
     TASKS.filter(t=>t.group===g).forEach(t => {
       const done = state[t.id] ? 'done' : '';
       html += `<div class="task-item ${done}" onclick="toggleTask(${i},'${t.id}')">
-        <div class="task-check">
-          <svg class="check-svg" viewBox="0 0 12 12" fill="none">
-            <path d="M2 6l3 3 5-5" stroke="#0a0a0a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
+        <div class="task-check"><svg class="check-svg" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6l3 3 5-5" stroke="#0a0a0a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg></div>
         <span class="task-name-t">${t.label}</span>
       </div>`;
     });
@@ -978,7 +1178,7 @@ function renderDetail() {
   document.getElementById('detail-panel').innerHTML = html;
 }
 
-function selectDay(i) { selectedDay = i; render(); }
+function selectDay(i)  { selectedDay = i; render(); }
 
 function toggleTask(day, taskId) {
   if (!persons[currentPerson][day]) persons[currentPerson][day] = {};
@@ -1012,8 +1212,10 @@ document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 // Init
 updateNameLabels();
 initSetupBar();
-const todayInit = getTodayIdx();
-if (todayInit >= 0) selectedDay = todayInit;
+initFirebaseBar();
+if (fbUrl) { syncDown(); startSyncTimer(); }
+const ti0 = getTodayIdx();
+if (ti0 >= 0) selectedDay = ti0;
 render();
 </script>
 </body>
