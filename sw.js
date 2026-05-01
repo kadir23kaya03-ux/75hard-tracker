@@ -1,4 +1,4 @@
-const CACHE_NAME = 'h75-cache-v3';
+const CACHE_NAME = 'h75-cache-v4';
 const urlsToCache = [
   './',
   './index.html',

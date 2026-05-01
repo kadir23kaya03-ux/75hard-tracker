@@ -860,13 +860,14 @@
   }
   .add-profile-btn:hover { background: rgba(255,255,255,0.05); border-color: var(--white); }
 
-  #pin-modal {
+  #pin-modal, #add-modal {
     position: fixed; top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(0,0,0,0.9); z-index: 9999;
     display: flex; align-items: center; justify-content: center;
     transition: opacity 0.3s, visibility 0.3s;
   }
-  #pin-modal.hidden { opacity: 0; visibility: hidden; }
+  #pin-modal.hidden, #add-modal.hidden { opacity: 0; visibility: hidden; }
+
 
   .profiles-bar {
     display: flex; gap: 8px; margin-top: 16px; margin-bottom: 0; align-items: center;
@@ -915,6 +916,21 @@
       <button class="btn-secondary" style="margin-top:8px; border:none; background:transparent; cursor:pointer;" onclick="closePinModal()">İptal</button>
     </div>
     <div id="pin-error" style="color: #ff4c4c; font-size: 13px; margin-top: 16px; opacity: 0; transition: opacity 0.3s;">Hatalı PIN.</div>
+  </div>
+</div>
+
+<!-- ADD MODAL -->
+<div id="add-modal" class="hidden">
+  <div class="auth-content">
+    <div class="auth-title">YENİ KİŞİ EKLE</div>
+    <div class="auth-subtitle">İsim ve 4 haneli bir şifre (PIN) belirle.</div>
+    <div class="auth-input-group" style="flex-direction:column; gap:12px; margin-top:24px;">
+      <input type="text" id="add-name-input" class="firebase-url-input" placeholder="İsim (Örn: Kadir)" style="width:100%; box-sizing:border-box; text-align:center; font-size:16px;" />
+      <input type="password" id="add-pin-input" class="firebase-url-input" placeholder="4 Haneli PIN" maxlength="4" style="width:100%; box-sizing:border-box; text-align:center; font-size:16px;" />
+      <button id="add-btn" style="width:100%; padding:14px; background:var(--accent); color:var(--black); border:none; border-radius:8px; font-weight:bold; cursor:pointer;" onclick="submitAddProfile()">OLUŞTUR</button>
+      <button class="btn-secondary" style="margin-top:8px; border:none; background:transparent; cursor:pointer; color:var(--muted);" onclick="closeAddModal()">İptal</button>
+    </div>
+    <div id="add-error" style="color:#ff4c4c; font-size:13px; margin-top:16px; opacity:0; transition:opacity 0.3s;">Lütfen tüm alanları doğru doldurun.</div>
   </div>
 </div>
 
@@ -1317,14 +1333,26 @@ function submitPin() {
   }
 }
 function showAddProfile() {
-  const name = prompt("Yeni kişinin adı:");
-  if (!name || !name.trim()) return;
-  const pin = prompt("Bu profil için 4 haneli bir PIN belirleyin:");
-  if (!pin || pin.length !== 4) return alert("4 haneli PIN girmelisiniz.");
+  document.getElementById('add-modal').classList.remove('hidden');
+  document.getElementById('add-name-input').value = '';
+  document.getElementById('add-pin-input').value = '';
+  document.getElementById('add-error').style.opacity = 0;
+}
+function closeAddModal() {
+  document.getElementById('add-modal').classList.add('hidden');
+}
+function submitAddProfile() {
+  const name = document.getElementById('add-name-input').value.trim();
+  const pin = document.getElementById('add-pin-input').value;
+  if (!name || pin.length !== 4) {
+    document.getElementById('add-error').style.opacity = 1;
+    return;
+  }
   const id = 'p_' + Date.now();
-  profiles[id] = { name: name.trim(), pin: pin, data: {} };
+  profiles[id] = { name: name, pin: pin, data: {} };
   saveProfiles();
   renderProfileScreen();
+  closeAddModal();
 }
 
 function renderProfilesBar() {
