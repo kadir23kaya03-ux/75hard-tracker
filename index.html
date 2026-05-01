@@ -421,6 +421,40 @@
   .pill-push { background: rgba(56,130,221,0.15); color: #85b7eb; }
   .pill-pull { background: rgba(30,158,117,0.15); color: #5DCAA5; }
   .pill-leg { background: rgba(216,90,48,0.15); color: #F0997B; }
+  .pill-recovery { background: rgba(245,200,66,0.15); color: #f5c842; }
+  .pill-warmup { background: rgba(200,245,62,0.15); color: #c8f53e; }
+
+  /* COACH NOTES */
+  .coach-notes {
+    margin-top: 32px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-left: 3px solid var(--accent);
+    padding: 24px;
+  }
+  .coach-note-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .coach-note-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+  }
+  .coach-note-item {
+    font-size: 13px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.7);
+  }
+  .coach-note-item strong {
+    color: var(--white);
+    display: block;
+    margin-bottom: 4px;
+  }
   .task-list { display: flex; flex-direction: column; gap: 2px; }
   .task-item {
     display: flex;
@@ -849,51 +883,106 @@
     Eski profesyonel yüzücü altyapısıyla tasarlandı. Yüksek hacim, ileri seviye, kas kütlesi odaklı.
   </p>
   <div class="program-tabs reveal">
-    <button class="ptab active" onclick="showTab('push')">Push</button>
+    <button class="ptab active" onclick="showTab('warmup')">Isınma</button>
+    <button class="ptab" onclick="showTab('push')">Push</button>
     <button class="ptab" onclick="showTab('pull')">Pull</button>
     <button class="ptab" onclick="showTab('leg')">Leg</button>
+    <button class="ptab" onclick="showTab('recovery')">Aktif Dinlenme</button>
   </div>
-  <div id="tab-push" class="program-panel active reveal">
+
+  <div id="tab-warmup" class="program-panel active reveal">
     <table class="exercise-table">
       <thead><tr><th>#</th><th>Egzersiz</th><th>Setler</th></tr></thead>
       <tbody>
-        <tr><td class="ex-num">01</td><td><div class="ex-name">Bench Press (düz barbell)</div><div class="ex-detail">Ana güç hareketi — ağır, dinlenmeli</div></td><td class="ex-sets">5×5</td></tr>
-        <tr><td class="ex-num">02</td><td><div class="ex-name">İncline Dumbbell Press</div><div class="ex-detail">Üst göğüs vurgusu</div></td><td class="ex-sets">4×8-10</td></tr>
-        <tr><td class="ex-num">03</td><td><div class="ex-name">Cable Fly / Pec Deck</div><div class="ex-detail">İzolasyon, kasılmaya odaklan</div></td><td class="ex-sets">3×12</td></tr>
-        <tr><td class="ex-num">04</td><td><div class="ex-name">Overhead Press (barbell)</div><div class="ex-detail">Omuz ana hareketi</div></td><td class="ex-sets">4×6-8</td></tr>
-        <tr><td class="ex-num">05</td><td><div class="ex-name">Lateral Raise</div><div class="ex-detail">Orta delt — kontrollü, hafif</div></td><td class="ex-sets">4×15</td></tr>
-        <tr><td class="ex-num">06</td><td><div class="ex-name">Skull Crusher</div><div class="ex-detail">Triceps uzun baş</div></td><td class="ex-sets">3×10</td></tr>
-        <tr><td class="ex-num">07</td><td><div class="ex-name">Triceps Pushdown</div><div class="ex-detail">Bitiş izolasyonu</div></td><td class="ex-sets">3×12</td></tr>
+        <tr><td class="ex-num">DİN</td><td><div class="ex-name">Dinamik Isınma</div><div class="ex-detail">200 İp, 10 Tek Ayak Squat, 10 Squat, 10 Öne Lunge, 10 Geri Lunge, 10 Yan Lunge, 10 Hand Walks, 10 Hip Crossover, 10 Dikey Sıçrama</div></td><td class="ex-sets">1 Tur</td></tr>
+        <tr><td class="ex-num">COR</td><td><div class="ex-name">Core & Yer Hareketleri</div><div class="ex-detail">25 Bacak Kaldır, 25 Ters Mekik, 40 Yan Mekik, 25 Ters Mekik, 20 İçeri Mekik, 30sn Ters Kol-Bacak, 50 Dağ Tırmanışı, 15 Mekik Squat, 40sn Sırt Ayak, 10 Diamond Push Up, 10 Dive Bomber, 20 Cobra, 20 Bosu Squat, 20 Ölü Böcek, 15 SB Diz Çek, 20 SB Ters Bacak Kaldır</div></td><td class="ex-sets">1 Tur</td></tr>
+        <tr><td class="ex-num">BND</td><td><div class="ex-name">Thera Band Serisi</div><div class="ex-detail">Yana Açış, Önde Açış, Int Rot, Ext Rot, Öne İtiş, Omuz Ext, Omuz Flex</div></td><td class="ex-sets">1×20 (Her biri)</td></tr>
       </tbody>
     </table>
   </div>
+
+  <div id="tab-push" class="program-panel reveal">
+    <table class="exercise-table">
+      <thead><tr><th>#</th><th>Egzersiz</th><th>Setler</th></tr></thead>
+      <tbody>
+        <tr><td class="ex-num">01</td><td><div class="ex-name">Bench Press (düz barbell)</div><div class="ex-detail">Ana güç hareketi — ağır, dinlenmeli</div></td><td class="ex-sets">4×6</td></tr>
+        <tr><td class="ex-num">02</td><td><div class="ex-name">İncline Dumbbell Press</div><div class="ex-detail">Üst göğüs vurgusu (Yardımcı)</div></td><td class="ex-sets">4×8-12</td></tr>
+        <tr><td class="ex-num">03</td><td><div class="ex-name">Overhead Press (barbell)</div><div class="ex-detail">Omuz ana hareketi (Yardımcı)</div></td><td class="ex-sets">4×8-12</td></tr>
+        <tr><td class="ex-num">04</td><td><div class="ex-name">Cable Fly / Pec Deck</div><div class="ex-detail">İzolasyon, kasılmaya odaklan</div></td><td class="ex-sets">3×12</td></tr>
+        <tr><td class="ex-num">05</td><td><div class="ex-name">Lateral Raise</div><div class="ex-detail">Orta delt — kontrollü, hafif</div></td><td class="ex-sets">3×12</td></tr>
+        <tr><td class="ex-num">06</td><td><div class="ex-name">Rear Delt Fly</div><div class="ex-detail">Arka omuz desteği</div></td><td class="ex-sets">3×12</td></tr>
+        <tr><td class="ex-num">07</td><td><div class="ex-name">Skull Crusher</div><div class="ex-detail">Triceps uzun baş</div></td><td class="ex-sets">3×12</td></tr>
+        <tr><td class="ex-num">08</td><td><div class="ex-name">Triceps Pushdown</div><div class="ex-detail">Bitiş izolasyonu</div></td><td class="ex-sets">3×12</td></tr>
+      </tbody>
+    </table>
+  </div>
+
   <div id="tab-pull" class="program-panel">
     <table class="exercise-table">
       <thead><tr><th>#</th><th>Egzersiz</th><th>Setler</th></tr></thead>
       <tbody>
-        <tr><td class="ex-num">01</td><td><div class="ex-name">Deadlift</div><div class="ex-detail">Ana güç hareketi — maksimal</div></td><td class="ex-sets">5×3-5</td></tr>
-        <tr><td class="ex-num">02</td><td><div class="ex-name">Weighted Pull-up</div><div class="ex-detail">Ağırlıklı, latissimus vurgusu</div></td><td class="ex-sets">4×6-8</td></tr>
-        <tr><td class="ex-num">03</td><td><div class="ex-name">Barbell Row</div><div class="ex-detail">Kalın sırt kütlesi için</div></td><td class="ex-sets">4×8</td></tr>
-        <tr><td class="ex-num">04</td><td><div class="ex-name">Seated Cable Row</div><div class="ex-detail">Orta sırt izolasyonu</div></td><td class="ex-sets">3×10-12</td></tr>
-        <tr><td class="ex-num">05</td><td><div class="ex-name">Face Pull</div><div class="ex-detail">Arka delt + rotator cuff sağlığı</div></td><td class="ex-sets">3×15</td></tr>
-        <tr><td class="ex-num">06</td><td><div class="ex-name">Barbell Curl</div><div class="ex-detail">Biceps ana hareketi</div></td><td class="ex-sets">3×10</td></tr>
-        <tr><td class="ex-num">07</td><td><div class="ex-name">Hammer Curl</div><div class="ex-detail">Brachialis + ön kol</div></td><td class="ex-sets">3×12</td></tr>
+        <tr><td class="ex-num">01</td><td><div class="ex-name">Deadlift</div><div class="ex-detail">Ana güç hareketi — Bele dikkat, kontrollü!</div></td><td class="ex-sets">4×6</td></tr>
+        <tr><td class="ex-num">02</td><td><div class="ex-name">Weighted Pull-up</div><div class="ex-detail">Ağırlıklı, latissimus vurgusu</div></td><td class="ex-sets">4×8-12</td></tr>
+        <tr><td class="ex-num">03</td><td><div class="ex-name">Barbell Row</div><div class="ex-detail">Kalın sırt kütlesi için</div></td><td class="ex-sets">4×8-12</td></tr>
+        <tr><td class="ex-num">04</td><td><div class="ex-name">Seated Cable Row</div><div class="ex-detail">Orta sırt izolasyonu</div></td><td class="ex-sets">3×12</td></tr>
+        <tr><td class="ex-num">05</td><td><div class="ex-name">Face Pull</div><div class="ex-detail">Rotator cuff sağlığı</div></td><td class="ex-sets">3×12</td></tr>
+        <tr><td class="ex-num">06</td><td><div class="ex-name">Hyperextension</div><div class="ex-detail">Bel desteği ve alt sırt</div></td><td class="ex-sets">3×12</td></tr>
+        <tr><td class="ex-num">07</td><td><div class="ex-name">Barbell Curl</div><div class="ex-detail">Biceps ana hareketi</div></td><td class="ex-sets">4×8-12</td></tr>
+        <tr><td class="ex-num">08</td><td><div class="ex-name">Hammer Curl</div><div class="ex-detail">Brachialis + ön kol</div></td><td class="ex-sets">3×12</td></tr>
       </tbody>
     </table>
   </div>
+
   <div id="tab-leg" class="program-panel">
     <table class="exercise-table">
       <thead><tr><th>#</th><th>Egzersiz</th><th>Setler</th></tr></thead>
       <tbody>
-        <tr><td class="ex-num">01</td><td><div class="ex-name">Back Squat</div><div class="ex-detail">Ana güç hareketi — derine in</div></td><td class="ex-sets">5×5</td></tr>
-        <tr><td class="ex-num">02</td><td><div class="ex-name">Romanian Deadlift</div><div class="ex-detail">Hamstring ve glute odaklı</div></td><td class="ex-sets">4×8-10</td></tr>
-        <tr><td class="ex-num">03</td><td><div class="ex-name">Leg Press</div><div class="ex-detail">Hacim için, ayak pozisyonu değiştir</div></td><td class="ex-sets">3×12</td></tr>
-        <tr><td class="ex-num">04</td><td><div class="ex-name">Walking Lunge</div><div class="ex-detail">Denge + tek taraflı kuvvet</div></td><td class="ex-sets">3×12/bacak</td></tr>
-        <tr><td class="ex-num">05</td><td><div class="ex-name">Leg Curl (machine)</div><div class="ex-detail">Hamstring izolasyonu</div></td><td class="ex-sets">3×12</td></tr>
-        <tr><td class="ex-num">06</td><td><div class="ex-name">Leg Extension</div><div class="ex-detail">Quad izolasyonu</div></td><td class="ex-sets">3×15</td></tr>
-        <tr><td class="ex-num">07</td><td><div class="ex-name">Standing Calf Raise</div><div class="ex-detail">Gastrocnemius için derin iniş</div></td><td class="ex-sets">4×20</td></tr>
+        <tr><td class="ex-num">01</td><td><div class="ex-name">Back Squat</div><div class="ex-detail">Ana güç hareketi — derine in</div></td><td class="ex-sets">4×6</td></tr>
+        <tr><td class="ex-num">02</td><td><div class="ex-name">Romanian Deadlift</div><div class="ex-detail">Hamstring ve glute odaklı</div></td><td class="ex-sets">4×8-12</td></tr>
+        <tr><td class="ex-num">03</td><td><div class="ex-name">Leg Press</div><div class="ex-detail">Hacim için, ayak pozisyonu değiştir</div></td><td class="ex-sets">4×8-12</td></tr>
+        <tr><td class="ex-num">04</td><td><div class="ex-name">Hip Thrust</div><div class="ex-detail">Glute odaklı destek hareketi</div></td><td class="ex-sets">4×8-12</td></tr>
+        <tr><td class="ex-num">05</td><td><div class="ex-name">Walking Lunge</div><div class="ex-detail">Denge + tek taraflı kuvvet</div></td><td class="ex-sets">3×12</td></tr>
+        <tr><td class="ex-num">06</td><td><div class="ex-name">Leg Extension</div><div class="ex-detail">Quad izolasyonu</div></td><td class="ex-sets">3×12</td></tr>
+        <tr><td class="ex-num">07</td><td><div class="ex-name">Leg Curl (machine)</div><div class="ex-detail">Hamstring izolasyonu</div></td><td class="ex-sets">3×12</td></tr>
+        <tr><td class="ex-num">08</td><td><div class="ex-name">Standing Calf Raise</div><div class="ex-detail">Gastrocnemius için derin iniş</div></td><td class="ex-sets">3×12</td></tr>
       </tbody>
     </table>
+  </div>
+
+  <div id="tab-recovery" class="program-panel">
+    <table class="exercise-table">
+      <thead><tr><th>#</th><th>Egzersiz</th><th>Setler</th></tr></thead>
+      <tbody>
+        <tr><td class="ex-num">01</td><td><div class="ex-name">Tempolu Yürüyüş</div><div class="ex-detail">Açık hava veya bant</div></td><td class="ex-sets">30-45 dk</td></tr>
+        <tr><td class="ex-num">02</td><td><div class="ex-name">Plank</div><div class="ex-detail">Statik core dayanıklılığı</div></td><td class="ex-sets">3×Maks</td></tr>
+        <tr><td class="ex-num">03</td><td><div class="ex-name">Crunch</div><div class="ex-detail">Karın sıkıştırma</div></td><td class="ex-sets">3×15-20</td></tr>
+        <tr><td class="ex-num">04</td><td><div class="ex-name">Lying Leg Raise</div><div class="ex-detail">Alt karın odaklı</div></td><td class="ex-sets">3×15</td></tr>
+        <tr><td class="ex-num">05</td><td><div class="ex-name">Stretching / Esneme</div><div class="ex-detail">Tüm vücut statik esneme ve rahatlama</div></td><td class="ex-sets">10 dk</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Hocanın Notları -->
+  <div class="coach-notes reveal">
+    <div class="coach-note-title">Hocanın Notları & Şiddet Planı</div>
+    <div class="coach-note-grid">
+      <div class="coach-note-item">
+        <strong>Şiddet (Periodization)</strong>
+        • Adpt. (%70-75)<br>
+        • Güç (%75-85)<br>
+        • Yoğunluk (%80-90)<br>
+        • Peak (%85-92)<br>
+        • Son Hafta Deload (%60)
+      </div>
+      <div class="coach-note-item">
+        <strong>Tükeniş Uyarısı</strong>
+        Her sette tükenişe gitme, program uzun (75 gün) yıldırtmasın. Maksimal kiloları bulup ilerlemek daha iyi olur.
+      </div>
+      <div class="coach-note-item">
+        <strong>Beslenme & Uyku</strong>
+        Gece takılıp antrenmana gidersen patlarsın. Öncelik uyku ve beslenme. Destek: Omega 3, Magnezyum, Kreatin.
+      </div>
+    </div>
   </div>
 </section>
 
@@ -978,7 +1067,8 @@
 </footer>
 
 <script>
-const SCHEDULE = ['Push','Pull','Leg','Push','Pull','Leg','Push'];
+const SCHEDULE = ['Push','Pull','Leg','Recovery','Push','Pull','Leg'];
+const SCHEDULE_TR = {'Push':'Push', 'Pull':'Pull', 'Leg':'Leg', 'Recovery':'Dinlenme'};
 const TASKS = [
   {id:'run',   label:'Sabah koşusu (45+ dk, açık hava)', group:'sabah'},
   {id:'water', label:'3.8 litre su',                     group:'gün'},
@@ -1114,7 +1204,7 @@ function getTodayIdx() {
 }
 
 function dayLabel(i) {
-  if (!startDate) return SCHEDULE[i%7].slice(0,3);
+  if (!startDate) return SCHEDULE_TR[SCHEDULE[i%7]].slice(0,3).toUpperCase();
   const d = new Date(startDate);
   d.setDate(d.getDate() + i);
   return d.toLocaleDateString('tr-TR', {day:'numeric', month:'short'});
@@ -1218,7 +1308,7 @@ function renderGrid() {
     const cls = isComplete(i) ? 'complete' : p.done > 0 ? 'partial' : '';
     const sel = i === selectedDay ? 'selected' : '';
     const tod = i === ti ? 'today' : '';
-    return `<div class="day-cell ${cls} ${sel} ${tod}" onclick="selectDay(${i})" title="${dayLabel(i)} · ${SCHEDULE[i%7]}">
+    return `<div class="day-cell ${cls} ${sel} ${tod}" onclick="selectDay(${i})" title="${dayLabel(i)} · ${SCHEDULE_TR[SCHEDULE[i%7]]}">
       <div class="day-cell-num">${i+1}</div>
       <div class="day-cell-type">${dayLabel(i)}</div>
     </div>`;
@@ -1228,6 +1318,7 @@ function renderGrid() {
 function renderDetail() {
   const i       = selectedDay;
   const type    = SCHEDULE[i%7];
+  const typeTr  = SCHEDULE_TR[type];
   const state   = getState()[i] || {};
   const pillCls = `pill-${type.toLowerCase()}`;
   const todayBadge = i === getTodayIdx()
@@ -1236,7 +1327,7 @@ function renderDetail() {
     ? `<div style="font-family:\'DM Mono\',monospace;font-size:11px;color:var(--muted);margin-bottom:16px;letter-spacing:0.08em;">${new Date(new Date(startDate).setDate(new Date(startDate).getDate()+i)).toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long'})}</div>` : '';
   const groups = ['sabah','gün','akşam'];
   const groupLabels = {sabah:'Sabah', gün:'Gün boyu', akşam:'Akşam'};
-  let html = `<div class="detail-day-title">Gün ${i+1}${todayBadge} <span class="type-pill ${pillCls}">${type.toUpperCase()}</span></div>${dateLine}<div class="task-list">`;
+  let html = `<div class="detail-day-title">Gün ${i+1}${todayBadge} <span class="type-pill ${pillCls}">${typeTr.toUpperCase()}</span></div>${dateLine}<div class="task-list">`;
   groups.forEach(g => {
     html += `<div class="task-group-label">${groupLabels[g]}</div>`;
     TASKS.filter(t=>t.group===g).forEach(t => {
