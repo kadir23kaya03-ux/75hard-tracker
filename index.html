@@ -821,6 +821,62 @@
     40%, 60% { transform: translate3d(4px, 0, 0); }
   }
   body.locked { overflow: hidden; }
+
+  /* PROFILES SCREEN */
+  #profile-screen {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: var(--black); z-index: 9998;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    transition: opacity 0.5s, visibility 0.5s;
+  }
+  #profile-screen.hidden { opacity: 0; visibility: hidden; }
+  .profile-header {
+    font-family: 'Bebas Neue', sans-serif; font-size: 48px;
+    letter-spacing: 0.1em; margin-bottom: 40px; color: var(--white);
+  }
+  .profile-list {
+    display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; max-width: 800px;
+  }
+  .profile-card {
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+    cursor: pointer; transition: transform 0.2s;
+  }
+  .profile-card:hover { transform: scale(1.05); }
+  .profile-avatar {
+    width: 100px; height: 100px; border-radius: 16px;
+    background: rgba(255,255,255,0.05); border: 2px solid transparent;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px; font-family: 'Bebas Neue', sans-serif; color: var(--accent);
+    transition: border-color 0.2s;
+  }
+  .profile-card:hover .profile-avatar { border-color: var(--white); }
+  .profile-name { font-size: 16px; color: var(--muted); transition: color 0.2s; }
+  .profile-card:hover .profile-name { color: var(--white); }
+  .add-profile-btn {
+    margin-top: 48px; background: transparent; border: 1px solid rgba(255,255,255,0.2);
+    color: var(--white); padding: 12px 24px; border-radius: 8px; cursor: pointer;
+    font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 0.1em;
+    transition: all 0.2s;
+  }
+  .add-profile-btn:hover { background: rgba(255,255,255,0.05); border-color: var(--white); }
+
+  #pin-modal {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.9); z-index: 9999;
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity 0.3s, visibility 0.3s;
+  }
+  #pin-modal.hidden { opacity: 0; visibility: hidden; }
+
+  .profiles-bar {
+    display: flex; gap: 8px; margin-top: 16px; margin-bottom: 0; align-items: center;
+    overflow-x: auto; padding-bottom: 8px;
+  }
+  .profiles-bar::-webkit-scrollbar { height: 4px; }
+  .profiles-bar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+  .profiles-bar .ptab {
+    flex-shrink: 0;
+  }
 </style>
 </head>
 <body class="locked">
@@ -836,6 +892,29 @@
       <button id="auth-btn" onclick="checkAuth()">GİRİŞ YAP</button>
     </div>
     <div id="auth-error">Hatalı kod. Tekrar dene.</div>
+  </div>
+</div>
+
+<!-- PROFILE SCREEN -->
+<div id="profile-screen" class="hidden">
+  <div class="profile-header">KİM İZLİYOR?</div>
+  <div class="profile-list" id="profile-list">
+    <!-- JS will inject -->
+  </div>
+  <button class="add-profile-btn" onclick="showAddProfile()">+ YENİ KİŞİ EKLE</button>
+</div>
+
+<!-- PIN MODAL -->
+<div id="pin-modal" class="hidden">
+  <div class="auth-content">
+    <div class="auth-title" id="pin-modal-title">PIN GİRİN</div>
+    <div class="auth-subtitle" id="pin-modal-sub"></div>
+    <div class="auth-input-group">
+      <input type="password" id="pin-input" placeholder="4 Haneli PIN" maxlength="4" />
+      <button id="pin-btn" onclick="submitPin()">GİRİŞ</button>
+      <button class="btn-secondary" style="margin-top:8px; border:none; background:transparent; cursor:pointer;" onclick="closePinModal()">İptal</button>
+    </div>
+    <div id="pin-error" style="color: #ff4c4c; font-size: 13px; margin-top: 16px; opacity: 0; transition: opacity 0.3s;">Hatalı PIN.</div>
   </div>
 </div>
 
@@ -1115,19 +1194,9 @@
   </div>
 
   <!-- person switch -->
-  <div style="display:flex; gap:8px; margin-top:16px; margin-bottom:0; align-items:center;" class="reveal">
-    <button class="ptab active" onclick="switchPerson(0,this)" id="p0btn">
-      <span id="p0name">Kişi 1</span>
-      <button class="name-edit-btn" onclick="event.stopPropagation(); editName(0)" title="İsmi düzenle">
-        <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M8.5 1.5l2 2L4 10H2v-2L8.5 1.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
-      </button>
-    </button>
-    <button class="ptab" onclick="switchPerson(1,this)" id="p1btn">
-      <span id="p1name">Kişi 2</span>
-      <button class="name-edit-btn" onclick="event.stopPropagation(); editName(1)" title="İsmi düzenle">
-        <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M8.5 1.5l2 2L4 10H2v-2L8.5 1.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
-      </button>
-    </button>
+  <!-- profile switch bar -->
+  <div class="profiles-bar reveal" id="profiles-bar">
+    <!-- JS will inject -->
   </div>
 
   <div class="tracker-wrap reveal">
@@ -1159,11 +1228,12 @@
 </footer>
 
 <script>
+
 /* ── AUTH ── */
 function initAuth() {
   if (localStorage.getItem('h75auth') === '1608') {
     document.getElementById('auth-screen').classList.add('hidden');
-    document.body.classList.remove('locked');
+    checkProfileScreen();
   } else {
     document.body.classList.add('locked');
   }
@@ -1175,7 +1245,7 @@ function checkAuth() {
     localStorage.setItem('h75auth', '1608');
     err.classList.remove('show');
     document.getElementById('auth-screen').classList.add('hidden');
-    document.body.classList.remove('locked');
+    checkProfileScreen();
   } else {
     err.classList.add('show');
     const content = document.querySelector('.auth-content');
@@ -1185,7 +1255,96 @@ function checkAuth() {
     input.value = '';
   }
 }
-initAuth(); // Sayfa yüklendiğinde kontrol et
+initAuth();
+
+/* ── PROFILES ── */
+let profiles = JSON.parse(localStorage.getItem('h75profiles') || '{}');
+let myProfileId = localStorage.getItem('h75myId') || null;
+let currentProfileId = myProfileId || null;
+let isReadOnly = false;
+
+function checkProfileScreen() {
+  if (!myProfileId) {
+    document.body.classList.add('locked');
+    document.getElementById('profile-screen').classList.remove('hidden');
+    renderProfileScreen();
+  } else {
+    document.body.classList.remove('locked');
+    document.getElementById('profile-screen').classList.add('hidden');
+    isReadOnly = false;
+    currentProfileId = myProfileId;
+    render();
+  }
+}
+
+function renderProfileScreen() {
+  const list = document.getElementById('profile-list');
+  list.innerHTML = '';
+  Object.keys(profiles).forEach(id => {
+    const pr = profiles[id];
+    list.innerHTML += `<div class="profile-card" onclick="openPinModal('${id}')">
+      <div class="profile-avatar">${pr.name.substring(0,2).toUpperCase()}</div>
+      <div class="profile-name">${pr.name}</div>
+    </div>`;
+  });
+}
+
+let pendingProfileId = null;
+function openPinModal(id) {
+  pendingProfileId = id;
+  document.getElementById('pin-modal-sub').textContent = 'Profil: ' + profiles[id].name;
+  document.getElementById('pin-modal').classList.remove('hidden');
+  document.getElementById('pin-input').value = '';
+  document.getElementById('pin-error').style.opacity = 0;
+}
+function closePinModal() {
+  document.getElementById('pin-modal').classList.add('hidden');
+}
+function submitPin() {
+  const pin = document.getElementById('pin-input').value;
+  if (pin === profiles[pendingProfileId].pin) {
+    localStorage.setItem('h75myId', pendingProfileId);
+    myProfileId = pendingProfileId;
+    currentProfileId = myProfileId;
+    isReadOnly = false;
+    closePinModal();
+    document.getElementById('profile-screen').classList.add('hidden');
+    document.body.classList.remove('locked');
+    render();
+  } else {
+    document.getElementById('pin-error').style.opacity = 1;
+  }
+}
+function showAddProfile() {
+  const name = prompt("Yeni kişinin adı:");
+  if (!name || !name.trim()) return;
+  const pin = prompt("Bu profil için 4 haneli bir PIN belirleyin:");
+  if (!pin || pin.length !== 4) return alert("4 haneli PIN girmelisiniz.");
+  const id = 'p_' + Date.now();
+  profiles[id] = { name: name.trim(), pin: pin, data: {} };
+  saveProfiles();
+  renderProfileScreen();
+}
+
+function renderProfilesBar() {
+  const bar = document.getElementById('profiles-bar');
+  if (!bar) return;
+  bar.innerHTML = Object.keys(profiles).map(id => {
+    const pr = profiles[id];
+    const act = id === currentProfileId ? 'active' : '';
+    const badge = id === myProfileId ? ' <span style="font-size:10px;opacity:0.6;">(Ben)</span>' : '';
+    return `<button class="ptab ${act}" onclick="switchProfile('${id}')">${pr.name}${badge}</button>`;
+  }).join('');
+}
+function switchProfile(id) {
+  currentProfileId = id;
+  isReadOnly = (currentProfileId !== myProfileId);
+  render();
+}
+function saveProfiles() {
+  localStorage.setItem('h75profiles', JSON.stringify(profiles));
+  syncUp();
+}
 
 const SCHEDULE = ['Push','Pull','Leg','Recovery','Push','Pull','Leg'];
 const SCHEDULE_TR = {'Push':'Push', 'Pull':'Pull', 'Leg':'Leg', 'Recovery':'Dinlenme'};
@@ -1198,11 +1357,8 @@ const TASKS = [
   {id:'gym',   label:'Akşam antrenmanı (45+ dk)',        group:'akşam'},
 ];
 
-let persons   = [JSON.parse(localStorage.getItem('h75p0')||'{}'), JSON.parse(localStorage.getItem('h75p1')||'{}')];
-let names     = JSON.parse(localStorage.getItem('h75names') || '["Kişi 1","Kişi 2"]');
 let startDate = localStorage.getItem('h75start') || null;
 let fbUrl     = localStorage.getItem('h75fb')    || '';
-let currentPerson = 0;
 let selectedDay   = 0;
 let syncTimer     = null;
 let isSaving      = false;
@@ -1239,10 +1395,7 @@ async function syncUp() {
   if (!fbUrl || isSaving) return;
   isSaving = true;
   try {
-    await Promise.all([
-      fbWrite(`p${currentPerson}`, persons[currentPerson]),
-      fbPatch('meta', { names, startDate })
-    ]);
+    await fbPatch('', { profiles, start: startDate });
     setSyncStatus('on');
   } catch(e) { setSyncStatus('err'); }
   isSaving = false;
@@ -1253,15 +1406,27 @@ async function syncDown() {
   try {
     const data = await fbRead('');
     if (!data) return;
-    if (data.p0) { persons[0]=data.p0; localStorage.setItem('h75p0', JSON.stringify(data.p0)); }
-    if (data.p1) { persons[1]=data.p1; localStorage.setItem('h75p1', JSON.stringify(data.p1)); }
-    if (data.meta) {
-      if (data.meta.names)     { names=data.meta.names; localStorage.setItem('h75names', JSON.stringify(names)); }
-      if (data.meta.startDate) { startDate=data.meta.startDate; localStorage.setItem('h75start', startDate); }
+    if (data.profiles) {
+      profiles = data.profiles;
+      localStorage.setItem('h75profiles', JSON.stringify(profiles));
     }
-    updateNameLabels();
+    if (data.start) {
+      startDate = data.start;
+      localStorage.setItem('h75start', startDate);
+    }
+    
+    if (document.getElementById('profile-screen').classList.contains('hidden') === false) {
+      renderProfileScreen();
+    } else {
+      if (myProfileId && !profiles[myProfileId]) {
+        myProfileId = null;
+        localStorage.removeItem('h75myId');
+        checkProfileScreen();
+      } else {
+        render();
+      }
+    }
     initSetupBar();
-    render();
     setSyncStatus('on');
   } catch(e) { setSyncStatus('err'); }
 }
@@ -1282,7 +1447,7 @@ function startSyncTimer() {
 /* ── Firebase UI ── */
 function connectFirebase() {
   const val = document.getElementById('firebase-url-input').value.trim().replace(/\/+$/, '');
-  if (!val.startsWith('https://')) { alert('Geçerli bir Firebase URL girin.\nÖrnek: https://proje-default-rtdb.firebaseio.com'); return; }
+  if (!val.startsWith('https://')) { alert('Geçerli bir Firebase URL girin.'); return; }
   fbUrl = val;
   localStorage.setItem('h75fb', fbUrl);
   initFirebaseBar();
@@ -1349,6 +1514,7 @@ function initSetupBar() {
 function confirmStartDate() {
   const val = document.getElementById('start-date-input').value;
   if (!val) return;
+  if (isReadOnly) return alert("Sadece okuma modundasınız.");
   startDate = val;
   localStorage.setItem('h75start', val);
   const ti = getTodayIdx();
@@ -1359,6 +1525,7 @@ function confirmStartDate() {
 }
 
 function resetStartDate() {
+  if (isReadOnly) return alert("Sadece okuma modundasınız.");
   if (!confirm('Başlangıç tarihini sıfırlamak istediğinizden emin misiniz?')) return;
   startDate = null;
   localStorage.removeItem('h75start');
@@ -1367,32 +1534,15 @@ function resetStartDate() {
   render();
 }
 
-/* ── İsim düzenleme ── */
-function editName(p) {
-  const val = prompt(`${p===0?'Birinci':'İkinci'} kişinin adı:`, names[p]);
-  if (val && val.trim()) {
-    names[p] = val.trim();
-    localStorage.setItem('h75names', JSON.stringify(names));
-    updateNameLabels();
-    syncUp();
-  }
-}
-
-function updateNameLabels() {
-  document.getElementById('p0name').textContent = names[0];
-  document.getElementById('p1name').textContent = names[1];
-}
-
 /* ── Veri ── */
-function save() {
-  localStorage.setItem(`h75p${currentPerson}`, JSON.stringify(persons[currentPerson]));
-  syncUp();
+function getState() {
+  if (!currentProfileId || !profiles[currentProfileId]) return {};
+  return profiles[currentProfileId].data[selectedDay] || {};
 }
-
-function getState() { return persons[currentPerson]; }
 
 function dayProgress(i) {
-  const d = getState()[i] || {};
+  if (!currentProfileId || !profiles[currentProfileId]) return { done: 0, total: TASKS.length };
+  const d = profiles[currentProfileId].data[i] || {};
   return { done: TASKS.filter(t => d[t.id]).length, total: TASKS.length };
 }
 
@@ -1436,10 +1586,11 @@ function renderGrid() {
 }
 
 function renderDetail() {
+  if (!currentProfileId) return;
   const i       = selectedDay;
   const type    = SCHEDULE[i%7];
   const typeTr  = SCHEDULE_TR[type];
-  const state   = getState()[i] || {};
+  const state   = getState() || {};
   const pillCls = `pill-${type.toLowerCase()}`;
   const todayBadge = i === getTodayIdx()
     ? ' <span style="font-family:\'DM Mono\',monospace;font-size:11px;color:var(--white);background:rgba(255,255,255,0.1);padding:3px 10px;letter-spacing:0.08em;">BUGÜN</span>' : '';
@@ -1447,7 +1598,13 @@ function renderDetail() {
     ? `<div style="font-family:\'DM Mono\',monospace;font-size:11px;color:var(--muted);margin-bottom:16px;letter-spacing:0.08em;">${new Date(new Date(startDate).setDate(new Date(startDate).getDate()+i)).toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long'})}</div>` : '';
   const groups = ['sabah','gün','akşam'];
   const groupLabels = {sabah:'Sabah', gün:'Gün boyu', akşam:'Akşam'};
+  
   let html = `<div class="detail-day-title">Gün ${i+1}${todayBadge} <span class="type-pill ${pillCls}">${typeTr.toUpperCase()}</span></div>${dateLine}<div class="task-list">`;
+  
+  if (isReadOnly) {
+    html = `<div style="background:rgba(255,76,76,0.1); color:#ff4c4c; padding:8px 16px; border-radius:4px; font-size:12px; font-weight:bold; margin-bottom:16px; border:1px solid rgba(255,76,76,0.2);">SADECE OKUMA MODU: Başka bir profili inceliyorsunuz.</div>` + html;
+  }
+  
   groups.forEach(g => {
     html += `<div class="task-group-label">${groupLabels[g]}</div>`;
     TASKS.filter(t=>t.group===g).forEach(t => {
@@ -1462,24 +1619,28 @@ function renderDetail() {
   });
   html += '</div>';
   const noteVal = state.note || '';
-  html += `<textarea class="daily-note-area" placeholder="Günün notunu buraya yaz..." onchange="saveNote(${i}, this.value)">${noteVal}</textarea>`;
+  html += `<textarea class="daily-note-area" placeholder="Günün notunu buraya yaz..." onchange="saveNote(${i}, this.value)" ${isReadOnly ? 'disabled' : ''}>${noteVal}</textarea>`;
   if (isComplete(i)) html += `<div class="complete-banner">GÜN TAMAMLANDI</div>`;
   document.getElementById('detail-panel').innerHTML = html;
 }
 
 function saveNote(day, text) {
-  if (!persons[currentPerson][day]) persons[currentPerson][day] = {};
-  persons[currentPerson][day].note = text;
-  save();
+  if (isReadOnly) return alert("Sadece okuma modundasınız.");
+  if (!profiles[currentProfileId].data) profiles[currentProfileId].data = {};
+  if (!profiles[currentProfileId].data[day]) profiles[currentProfileId].data[day] = {};
+  profiles[currentProfileId].data[day].note = text;
+  saveProfiles();
 }
 
 function selectDay(i)  { selectedDay = i; render(); }
 
 function toggleTask(day, taskId) {
-  if (!persons[currentPerson][day]) persons[currentPerson][day] = {};
+  if (isReadOnly) return alert("Sadece okuma modundasınız. Başkasının programına müdahale edemezsiniz.");
+  if (!profiles[currentProfileId].data) profiles[currentProfileId].data = {};
+  if (!profiles[currentProfileId].data[day]) profiles[currentProfileId].data[day] = {};
   const wasComplete = isComplete(day);
-  persons[currentPerson][day][taskId] = !persons[currentPerson][day][taskId];
-  save();
+  profiles[currentProfileId].data[day][taskId] = !profiles[currentProfileId].data[day][taskId];
+  saveProfiles();
   render();
   
   if (navigator.vibrate) navigator.vibrate(50);
@@ -1497,14 +1658,7 @@ function toggleTask(day, taskId) {
   }
 }
 
-function render() { updateStats(); renderGrid(); renderDetail(); }
-
-function switchPerson(p, btn) {
-  currentPerson = p;
-  document.querySelectorAll('#p0btn,#p1btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  render();
-}
+function render() { renderProfilesBar(); updateStats(); renderGrid(); renderDetail(); }
 
 function showTab(t) {
   document.querySelectorAll('.program-panel').forEach(p => p.classList.remove('active'));
@@ -1538,20 +1692,12 @@ function hexToRgb(hex) {
 const savedTheme = JSON.parse(localStorage.getItem('h75theme'));
 if (savedTheme) setTheme(savedTheme.main, savedTheme.dark);
 
-updateNameLabels();
 initSetupBar();
 initFirebaseBar();
 if (fbUrl) { syncDown(); startSyncTimer(); }
 const ti0 = getTodayIdx();
 if (ti0 >= 0) selectedDay = ti0;
-render();
 
-// PWA SW
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW ref failed', err));
-  });
-}
 </script>
 </body>
 </html>
