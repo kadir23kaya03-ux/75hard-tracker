@@ -763,9 +763,81 @@
     .tracker-header { grid-template-columns: repeat(2,1fr); }
     footer { padding: 32px 20px; }
   }
+
+  /* AUTH SCREEN */
+  #auth-screen {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(5,5,5,0.95);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    z-index: 9999;
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+  }
+  #auth-screen.hidden { opacity: 0; visibility: hidden; }
+  .auth-content {
+    text-align: center; padding: 40px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px; max-width: 400px; width: 90%;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    transform: translateY(20px);
+    animation: authUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  @keyframes authUp { to { transform: translateY(0); } }
+  .auth-icon { font-size: 32px; margin-bottom: 16px; opacity: 0.8; }
+  .auth-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px; letter-spacing: 0.15em;
+    color: var(--accent); margin-bottom: 8px;
+  }
+  .auth-subtitle {
+    font-size: 14px; color: rgba(255,255,255,0.6);
+    margin-bottom: 32px; line-height: 1.5;
+  }
+  .auth-input-group { display: flex; flex-direction: column; gap: 12px; }
+  #auth-input {
+    background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
+    padding: 16px; border-radius: 8px; color: white;
+    font-family: 'DM Mono', monospace; font-size: 20px;
+    text-align: center; letter-spacing: 0.2em; transition: border-color 0.3s;
+  }
+  #auth-input:focus { outline: none; border-color: var(--accent); }
+  #auth-btn {
+    background: var(--accent); color: var(--black); border: none;
+    padding: 16px; border-radius: 8px; font-weight: 600; font-size: 14px;
+    letter-spacing: 0.1em; cursor: pointer; transition: transform 0.2s, filter 0.2s;
+  }
+  #auth-btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+  #auth-error {
+    color: #ff4c4c; font-size: 13px; margin-top: 16px;
+    opacity: 0; transition: opacity 0.3s;
+  }
+  #auth-error.show { opacity: 1; }
+  .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+  @keyframes shake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+  }
+  body.locked { overflow: hidden; }
 </style>
 </head>
-<body>
+<body class="locked">
+
+<!-- AUTH SCREEN -->
+<div id="auth-screen">
+  <div class="auth-content">
+    <div class="auth-icon">🔒</div>
+    <div class="auth-title">ÖZEL ERİŞİM</div>
+    <div class="auth-subtitle">Sadece kararlı olanlar için. Davet kodunu girerek kulübe katıl.</div>
+    <div class="auth-input-group">
+      <input type="password" id="auth-input" placeholder="Kodu girin" maxlength="4" />
+      <button id="auth-btn" onclick="checkAuth()">GİRİŞ YAP</button>
+    </div>
+    <div id="auth-error">Hatalı kod. Tekrar dene.</div>
+  </div>
+</div>
 
 <nav>
   <div class="nav-logo">75 HARD</div>
@@ -1067,6 +1139,34 @@
 </footer>
 
 <script>
+/* ── AUTH ── */
+function initAuth() {
+  if (localStorage.getItem('h75auth') === '1608') {
+    document.getElementById('auth-screen').classList.add('hidden');
+    document.body.classList.remove('locked');
+  } else {
+    document.body.classList.add('locked');
+  }
+}
+function checkAuth() {
+  const input = document.getElementById('auth-input');
+  const err = document.getElementById('auth-error');
+  if (input.value === '1608') {
+    localStorage.setItem('h75auth', '1608');
+    err.classList.remove('show');
+    document.getElementById('auth-screen').classList.add('hidden');
+    document.body.classList.remove('locked');
+  } else {
+    err.classList.add('show');
+    const content = document.querySelector('.auth-content');
+    content.classList.remove('shake');
+    void content.offsetWidth;
+    content.classList.add('shake');
+    input.value = '';
+  }
+}
+initAuth(); // Sayfa yüklendiğinde kontrol et
+
 const SCHEDULE = ['Push','Pull','Leg','Recovery','Push','Pull','Leg'];
 const SCHEDULE_TR = {'Push':'Push', 'Pull':'Pull', 'Leg':'Leg', 'Recovery':'Dinlenme'};
 const TASKS = [
