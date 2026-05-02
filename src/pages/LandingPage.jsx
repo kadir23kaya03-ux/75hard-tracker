@@ -211,7 +211,7 @@ export default function LandingPage() {
           </div>
           <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-4">PUSH · PULL<br/>· LEG</h2>
           <p className="text-gray-500 text-sm mb-10 max-w-xl leading-relaxed">
-            Eski profesyonel yüzücü altyapısıyla tasarlandı. Yüksek hacim, ileri seviye, kas kütlesi odaklı.
+            Salon savaş alanı. Her set bir sınav, her tekrar bir karar. Bahane yok, set atlamak yok — her gün aynı protokol.
           </p>
 
           {/* Tabs */}

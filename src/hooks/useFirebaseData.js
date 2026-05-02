@@ -7,7 +7,7 @@ export function useFirebaseData(userId) {
     name: '',
     currentDay: 1,
     progress: 0,
-    tasks: { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false },
+    tasks: { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false, 7: false },
     completedDays: {},   // { "1": true, "3": true, ... }
     dayHistory: {},      // { "1": 100, "2": 83, ... } — her günün % skoru
   });
@@ -25,7 +25,7 @@ export function useFirebaseData(userId) {
           name: data.name || '',
           currentDay: data.currentDay || 1,
           progress: data.progress || 0,
-          tasks: data.tasks || { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false },
+          tasks: data.tasks || { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false, 7: false },
           completedDays: data.completedDays || {},
           dayHistory: data.dayHistory || {},
           ...data,
@@ -35,7 +35,7 @@ export function useFirebaseData(userId) {
           name: userId,
           currentDay: 1,
           progress: 0,
-          tasks: { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false },
+          tasks: { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false, 7: false },
           completedDays: {},
           dayHistory: {},
           lastUpdated: new Date().toISOString(),
@@ -57,9 +57,9 @@ export function useFirebaseData(userId) {
 
     const newTasks = { ...userData.tasks, [taskId]: !userData.tasks[taskId] };
     const completedCount = Object.values(newTasks).filter(Boolean).length;
-    const newProgress = Math.round((completedCount / 6) * 100);
+    const newProgress = Math.round((completedCount / 7) * 100);
     const dayKey = String(userData.currentDay);
-    const allDone = completedCount === 6;
+    const allDone = completedCount === 7;
 
     // completedDays ve dayHistory güncelle
     const newCompletedDays = { ...userData.completedDays };
@@ -93,7 +93,7 @@ export function useFirebaseData(userId) {
   const completeDay = async () => {
     if (!userId || userData.progress < 100) return;
     const nextDay = Math.min((userData.currentDay || 1) + 1, 75);
-    const freshTasks = { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false };
+    const freshTasks = { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false, 7: false };
 
     setUserData(prev => ({
       ...prev,

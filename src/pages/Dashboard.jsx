@@ -5,7 +5,7 @@ import {
   Check, LogOut, Trophy, Users, Flame,
   Droplets, BookOpen, Dumbbell, Footprints,
   Utensils, Camera, Shield, Target, Home,
-  CalendarDays, BarChart2, ChevronRight
+  CalendarDays, BarChart2, ChevronRight, Pill
 } from 'lucide-react';
 import Workouts from '../components/Workouts';
 import Calendar75 from '../components/Calendar75';
@@ -20,6 +20,7 @@ const TASKS_DEF = [
   { id: 4, title: 'WORKOUT 2 (OUTDOOR)',  icon: Footprints },
   { id: 5, title: 'FOLLOW DIET',          icon: Utensils },
   { id: 6, title: 'PROGRESS PICTURE',     icon: Camera },
+  { id: 7, title: 'GÜNLÜK TAKVİYE',       icon: Pill },
 ];
 
 const NAV = [
