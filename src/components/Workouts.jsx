@@ -1,0 +1,141 @@
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+
+const WORKOUT_DATA = {
+  warmup: [
+    { num: '🔁', name: 'Foam Roller (Isınma Öncesi)', detail: 'Tüm vücudu genel olarak gez — üst sırt, kalça, bacaklar. Doku sıcaklığını artır, hareket hazırlığı yap.', sets: '5–6 dk' },
+    { num: 'DİN', name: 'Dinamik Isınma', detail: '200 İp, 10 Tek Ayak Squat, 10 Squat, 10 Öne Lunge, 10 Geri Lunge, 10 Yan Lunge, 10 Hand Walks, 10 Hip Crossover, 10 Dikey Sıçrama', sets: '1 Tur' },
+    { num: 'COR', name: 'Core & Yer Hareketleri', detail: '25 Bacak Kaldır, 25 Ters Mekik, 40 Yan Mekik, 20 İçeri Mekik, 30sn Ters Kol-Bacak, 50 Dağ Tırmanışı, 15 Mekik Squat, 40sn Sırt Ayak, 10 Diamond Push Up, 10 Dive Bomber, 20 Cobra, 20 Bosu Squat, 20 Ölü Böcek', sets: '1 Tur' },
+    { num: 'BND', name: 'Thera Band Serisi', detail: 'Yana Açış, Önde Açış, Int Rot, Ext Rot, Öne İtiş, Omuz Ext, Omuz Flex', sets: '1×20' },
+  ],
+  push: [
+    { num: '01', name: 'Bench Press', detail: 'Ana güç hareketi — ağır, dinlenmeli', sets: '4×6' },
+    { num: '02', name: 'İncline Dumbbell Press', detail: 'Üst göğüs vurgusu (Yardımcı)', sets: '4×8-12' },
+    { num: '03', name: 'Overhead Press', detail: 'Omuz ana hareketi (Yardımcı)', sets: '4×8-12' },
+    { num: '04', name: 'Cable Fly / Pec Deck', detail: 'İzolasyon, kasılmaya odaklan', sets: '3×12' },
+    { num: '05', name: 'Lateral Raise', detail: 'Orta delt — kontrollü, hafif', sets: '3×12' },
+    { num: '06', name: 'Rear Delt Fly', detail: 'Arka omuz desteği', sets: '3×12' },
+    { num: '07', name: 'Skull Crusher', detail: 'Triceps uzun baş', sets: '3×12' },
+    { num: '08', name: 'Triceps Pushdown', detail: 'Bitiş izolasyonu', sets: '3×12' },
+  ],
+  pull: [
+    { num: '01', name: 'Deadlift', detail: 'Ana güç hareketi — Bele dikkat, kontrollü!', sets: '4×6' },
+    { num: '02', name: 'Weighted Pull-up', detail: 'Ağırlıklı, latissimus vurgusu', sets: '4×8-12' },
+    { num: '03', name: 'Barbell Row', detail: 'Kalın sırt kütlesi için', sets: '4×8-12' },
+    { num: '04', name: 'Seated Cable Row', detail: 'Orta sırt izolasyonu', sets: '3×12' },
+    { num: '05', name: 'Face Pull', detail: 'Rotator cuff sağlığı', sets: '3×12' },
+    { num: '06', name: 'Hyperextension', detail: 'Bel desteği ve alt sırt', sets: '3×12' },
+    { num: '07', name: 'Barbell Curl', detail: 'Biceps ana hareketi', sets: '4×8-12' },
+    { num: '08', name: 'Hammer Curl', detail: 'Brachialis + ön kol', sets: '3×12' },
+  ],
+  leg: [
+    { num: '01', name: 'Back Squat', detail: 'Ana güç hareketi — derine in', sets: '4×6' },
+    { num: '02', name: 'Romanian Deadlift', detail: 'Hamstring ve glute odaklı', sets: '4×8-12' },
+    { num: '03', name: 'Leg Press', detail: 'Hacim için, ayak pozisyonu değiştir', sets: '4×8-12' },
+    { num: '04', name: 'Hip Thrust', detail: 'Glute odaklı destek hareketi', sets: '4×8-12' },
+    { num: '05', name: 'Walking Lunge', detail: 'Denge + tek taraflı kuvvet', sets: '3×12' },
+    { num: '06', name: 'Leg Extension', detail: 'Quad izolasyonu', sets: '3×12' },
+    { num: '07', name: 'Leg Curl', detail: 'Hamstring izolasyonu', sets: '3×12' },
+    { num: '08', name: 'Standing Calf Raise', detail: 'Gastrocnemius için derin iniş', sets: '3×12' },
+  ],
+  recovery: [
+    // — KARDİYO —
+    { num: '🚶', name: 'Düşük Yoğunluklu Kardiyo', detail: '⚡ Birini seç → Yürüyüş, Hafif Jog, Bisiklet veya Yüzme. Nefes kontrolü öncelikli, ritim sabit kalmalı.', sets: '30–45 dk' },
+    // — CORE YER HAREKETLERİ (Hoca + Ekstra) —
+    { num: 'C01', name: 'Bacak Kaldır', detail: 'Sırt üstü yat, bacakları düz ve birlikte yukarı kaldır. Beli yerde tut, kontrollü indir.', sets: '2×25' },
+    { num: 'C02', name: 'Ters Mekik', detail: 'Eller yanında ya da kalça altında, bacaklar yukarı — kalçayı yerden kaldır. Yavaş, kasılmaya odaklan.', sets: '2×25' },
+    { num: 'C03', name: 'Yan Mekik', detail: 'Eller şakağa, dirseği dize doğru at, oblik kasını sıkıştır. Her iki tarafa eşit.', sets: '2×40' },
+    { num: 'C04', name: 'İçeri Mekik', detail: 'Bacaklar havada 90°, üst gövdeyi karına doğru kaldır. Boynu serbest bırak, sadece core çalışsın.', sets: '2×20' },
+    { num: 'C05', name: 'Ters Kol – Ters Bacak', detail: 'Diz üstü pozisyon: Sağ kol + sol bacağı aynı anda uzat, gövde sabit. Karşı tarafı beklet.', sets: '2×30sn' },
+    { num: 'C06', name: 'Dağ Tırmanışı', detail: 'Plank pozisyonu: Dizleri hızlıca göğse çek, ritimli ve kontrollü. Kalçayı sabit tut.', sets: '2×50' },
+    { num: 'C07', name: 'Mekik Squat', detail: 'Mekikten kalk, doğrudan squata geç. Akışkan geçiş, core sürekli aktif.', sets: '2×15' },
+    { num: 'C08', name: 'Sırt Ayak (Superman Hold)', detail: 'Yüz üstü yat, kol ve bacakları aynı anda kaldır — sırt ve glute kasılsın. Pozisyonu koru.', sets: '2×40sn' },
+    { num: 'C09', name: 'Diamond Push Up', detail: 'Eller dar üçgen, dirsekler vücuda yakın. Triceps + iç göğüs odaklı. Tam ROM.', sets: '2×10' },
+    { num: 'C10', name: 'Dive Bomber Push Up', detail: 'Kıç havada, öne dalış hareketi. Omuz + göğüs + core kombine. Akıcı hareket.', sets: '2×10' },
+    { num: 'C11', name: 'Cobra', detail: 'Yüz üstü, eller göğüs yanında — göğsü kaldır, dirsekler hafif bükük. Bel kaslarını aktifleştir.', sets: '2×20' },
+    { num: 'C12', name: 'Bosu Squat (Titrek Zemin)', detail: 'Bosu top üzerinde squat — denge ve propriyosepsiyon. Yavaş in, kontrollü çık.', sets: '2×20' },
+    { num: 'C13', name: 'Ölü Böcek (Dead Bug)', detail: 'Sırt üstü: Karşı kol-bacak yere doğru uzat, bel yerde kalmalı. Nefes kontrolü kritik.', sets: '2×20' },
+    { num: 'C14', name: 'SB Diz Çek', detail: 'Stability ball üzerinde plank, topu göğse doğru çek. Omuz stabilitesi + core.', sets: '2×15' },
+    { num: 'C15', name: 'SB Ters Bacak Kaldır', detail: 'Top ayak bilekleri arasında, sırt üstü yatarak bacakları kaldır. Alt karın izolasyonu.', sets: '2×20' },
+    // — MOBİLİTE (FRC Temelli) —
+    { num: 'M01', name: 'Hip CARs', detail: 'Ayakta tek bacak dengesi: Diz yükseğe kaldır, kalçayı tam ROM\'da dışa-içe döndür. Yavaş ve kasılarak. (Controlled Articular Rotations)', sets: '2×5/taraf' },
+    { num: 'M02', name: 'Couch Stretch', detail: 'Duvara yaslanıp arka bacağı duvarda dik tut, öne bacak 90°. Derin hip flexor + quad açılışı.', sets: '2×60sn/taraf' },
+    { num: 'M03', name: '90/90 Hip Stretch + PAILs', detail: 'Otur, ön ve arka bacak 90°. 2dk pasif bekle, ardından 10sn zemine baskı uygula (PAILs). Derin iç rotasyon kazancı.', sets: '2×2dk/taraf' },
+    { num: 'M04', name: 'Bretzel Stretch', detail: 'Yan yat: Alt diz bükük, üst bacak önde — alt eli üst dizin üstünde tut, üst kolunu arkaya aç. Thoracic + hip kombine.', sets: '2×45sn/taraf' },
+    { num: 'M05', name: 'Jefferson Curl', detail: 'Hafif ağırlıkla (veya boş el): Baştan başlayarak omur omur öne kapan. Spinal traksiyon + posterior zincir decompression.', sets: '2×8' },
+    { num: 'M06', name: 'Deep Squat + Ankle CARs', detail: 'Derin squat pozisyonunda dur, ayak bileğini tam açı ile döndür. Dorsifleksiyon + kalça mobilitesi.', sets: '2×45sn' },
+    { num: 'M07', name: 'Shoulder CARs', detail: 'Kolları tam ROM\'da omuz ekleminden döndür: Öne–yukarı–arkaya–aşağı. Supraspinatus ve rotator cuff aktivasyonu.', sets: '2×5/taraf' },
+  ],
+  cooldown: [
+    { num: '🔁', name: 'Foam Roller (Soğuma)', detail: 'Antrenmanın ardından tüm çalışan bölgeleri gez. Yoğun noktalarda dur, kas dokusunu gevşet.', sets: '5–6 dk' },
+    { num: 'M01', name: 'Chest & Shoulder Stretch', detail: 'Kapı eşiği veya duvarda göğüs açılışı. Dirsek omuz hizasında, gövdeyi yavaşça öne ver.', sets: '2×30sn' },
+    { num: 'M02', name: "Cobra Pose → Child's Pose", detail: 'Bel rahatlatma ve alt sırt decompression. Aralarında geçişi yavaş yap.', sets: '2×40sn' },
+    { num: 'M03', name: 'Seated Hamstring Stretch', detail: 'Oturarak bacak düz, ayak dorsiflex, gövde öne, sırt düz.', sets: '2×35sn/taraf' },
+    { num: 'M04', name: 'Standing Quad & Hip Flexor', detail: 'Ayakta topuğu kalçaya çek + kalçayı hafifçe öne it. Çift etki.', sets: '2×30sn/taraf' },
+    { num: 'M05', name: 'Butterfly Stretch', detail: 'Sırt düz, tabanlar karşı karşıya. Dizleri hafifçe zemine doğru bas.', sets: '2×45sn' },
+    { num: 'M06', name: 'Thoracic Rotation (Bitiş)', detail: 'Sırt üstü yatarak diz büküp yana yatır, omuzlar yerde. Gövde rotasyonu soğuma.', sets: '2×30sn/taraf' },
+  ],
+};
+
+const TABS = [
+  { id: 'warmup', label: 'ISINMA' },
+  { id: 'push', label: 'PUSH' },
+  { id: 'pull', label: 'PULL' },
+  { id: 'leg', label: 'LEG' },
+  { id: 'recovery', label: 'DİNLENME' },
+  { id: 'cooldown', label: 'SOĞUMA' },
+];
+
+export default function Workouts() {
+  const [activeTab, setActiveTab] = useState('push');
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col">
+        <h2 className="text-xl font-black tracking-tighter uppercase mb-1">Combat Protocols</h2>
+        <p className="text-xs font-bold tracking-widest text-gray-500 uppercase">Eski profesyonel yüzücü altyapısı. Yüksek hacim, ileri seviye.</p>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex overflow-x-auto gap-2 pb-2 scrollbar-hide">
+        {TABS.map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`whitespace-nowrap px-4 py-2 text-xs font-bold tracking-widest uppercase border transition-all ${
+              activeTab === tab.id 
+                ? 'bg-red-600 border-red-500 text-white shadow-[0_0_10px_rgba(220,38,38,0.3)]' 
+                : 'bg-[#1a1a1a] border-[#333] text-gray-400 hover:border-red-900'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Workout List */}
+      <motion.div 
+        key={activeTab}
+        initial={{ opacity: 0, x: 10 }}
+        animate={{ opacity: 1, x: 0 }}
+        className="space-y-3"
+      >
+        {WORKOUT_DATA[activeTab].map((ex, idx) => (
+          <div key={idx} className="flex border border-[#262626] bg-[#121212] overflow-hidden group hover:border-red-900/50 transition-colors">
+            <div className="bg-[#1a1a1a] w-12 flex items-center justify-center border-r border-[#262626] group-hover:border-red-900/50 transition-colors text-gray-500 font-mono text-sm font-bold">
+              {ex.num}
+            </div>
+            <div className="p-3 flex-1">
+              <h3 className="font-bold text-white tracking-tight text-sm mb-1">{ex.name}</h3>
+              <p className="text-xs text-gray-500 leading-tight">{ex.detail}</p>
+            </div>
+            <div className="bg-red-900/10 border-l border-[#262626] group-hover:border-red-900/50 transition-colors px-3 flex flex-col justify-center items-center min-w-[70px]">
+              <span className="text-[10px] text-red-500/80 font-bold tracking-widest uppercase mb-0.5">SET</span>
+              <span className="text-xs font-black text-white">{ex.sets}</span>
+            </div>
+          </div>
+        ))}
+      </motion.div>
+    </div>
+  );
+}
