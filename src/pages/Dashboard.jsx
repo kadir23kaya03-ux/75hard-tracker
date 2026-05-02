@@ -6,13 +6,14 @@ import {
   Droplets, BookOpen, Dumbbell, Footprints,
   Utensils, Camera, Shield, Target, Home,
   CalendarDays, BarChart2, ChevronRight, Pill,
-  Zap, NotebookPen, CalendarCheck
+  Zap, NotebookPen, CalendarCheck, Bell, BellOff
 } from 'lucide-react';
 import Workouts from '../components/Workouts';
 import Calendar75 from '../components/Calendar75';
 import ProgressChart from '../components/ProgressChart';
 import { useFirebaseData } from '../hooks/useFirebaseData';
 import { useSquadData } from '../hooks/useSquadData';
+import { useNotifications } from '../hooks/useNotifications';
 
 const TASKS_DEF = [
   { id: 1, title: '1 GALLON WATER',       icon: Droplets },
@@ -72,6 +73,7 @@ export default function Dashboard({ user, onLogout }) {
   const streak = calcStreak(userData.completedDays, userData.currentDay, userData.progress);
   const startDateStr = formatDate(userData.startDate);
   const sorted = [...squad].sort((a, b) => (b.progress || 0) - (a.progress || 0));
+  const { permission, requestPermission, sendTestNotification } = useNotifications(userData.progress);
 
   /* ── TAB CONTENT ── */
   const TabContent = () => (
@@ -163,6 +165,45 @@ export default function Dashboard({ user, onLogout }) {
               className="w-full bg-transparent px-4 py-3 text-sm text-gray-300 placeholder-gray-600 resize-none outline-none font-mono leading-relaxed"
             />
           </div>
+
+          {/* Bildirim Kartı */}
+          {permission !== 'unsupported' && (
+            <div className={`border p-4 flex items-center justify-between gap-4 ${
+              permission === 'granted'
+                ? 'border-green-600/30 bg-green-900/5'
+                : 'border-[var(--color-dark-border)] bg-[var(--color-dark-card)]'
+            }`}>
+              <div className="flex items-center gap-3">
+                {permission === 'granted'
+                  ? <Bell className="w-5 h-5 text-green-500 flex-shrink-0" />
+                  : <BellOff className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                }
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-widest text-white">
+                    {permission === 'granted' ? 'Bildirimler Aktif' : 'Günlük Hatırlatıcı'}
+                  </p>
+                  <p className="text-[10px] text-gray-500 uppercase tracking-widest mt-0.5">
+                    {permission === 'granted' ? 'Her gün 21:00\'de hatırlatma' : 'Her gün saat 21:00\'de uyaralım'}
+                  </p>
+                </div>
+              </div>
+              {permission === 'granted' ? (
+                <button
+                  onClick={sendTestNotification}
+                  className="text-[10px] font-bold uppercase tracking-widest text-green-500 border border-green-600/30 px-3 py-1.5 hover:bg-green-600/10 transition-colors flex-shrink-0"
+                >
+                  Test
+                </button>
+              ) : (
+                <button
+                  onClick={requestPermission}
+                  className="text-[10px] font-bold uppercase tracking-widest text-white bg-red-600 hover:bg-red-700 px-3 py-1.5 transition-colors flex-shrink-0"
+                >
+                  Aktif Et
+                </button>
+              )}
+            </div>
+          )}
 
           {/* Progress Chart */}
           <div className="space-y-3">
