@@ -4,14 +4,25 @@ import LandingPage from './pages/LandingPage'
 import Login from './components/Login'
 import Dashboard from './pages/Dashboard'
 
+const SESSION_KEY = '75hard_session'
+
 function App() {
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem(SESSION_KEY)
+      return saved ? JSON.parse(saved) : null
+    } catch {
+      return null
+    }
+  })
 
   const handleLogin = (userData) => {
+    localStorage.setItem(SESSION_KEY, JSON.stringify(userData))
     setUser(userData)
   }
 
   const handleLogout = () => {
+    localStorage.removeItem(SESSION_KEY)
     setUser(null)
   }
 
