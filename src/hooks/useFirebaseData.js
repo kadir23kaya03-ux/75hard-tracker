@@ -2,14 +2,18 @@ import { useState, useEffect } from 'react';
 import { doc, onSnapshot, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
 
+const EMPTY_TASKS = { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false, 7: false };
+
 export function useFirebaseData(userId) {
   const [userData, setUserData] = useState({
     name: '',
     currentDay: 1,
     progress: 0,
-    tasks: { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false, 7: false },
-    completedDays: {},   // { "1": true, "3": true, ... }
-    dayHistory: {},      // { "1": 100, "2": 83, ... } — her günün % skoru
+    tasks: { ...EMPTY_TASKS },
+    completedDays: {},
+    dayHistory: {},
+    notes: {},
+    startDate: null,
   });
   const [loading, setLoading] = useState(true);
 
@@ -25,9 +29,11 @@ export function useFirebaseData(userId) {
           name: data.name || '',
           currentDay: data.currentDay || 1,
           progress: data.progress || 0,
-          tasks: data.tasks || { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false, 7: false },
+          tasks: data.tasks || { ...EMPTY_TASKS },
           completedDays: data.completedDays || {},
           dayHistory: data.dayHistory || {},
+          notes: data.notes || {},
+          startDate: data.startDate || null,
           ...data,
         });
       } else {
@@ -35,9 +41,11 @@ export function useFirebaseData(userId) {
           name: userId,
           currentDay: 1,
           progress: 0,
-          tasks: { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false, 7: false },
+          tasks: { ...EMPTY_TASKS },
           completedDays: {},
           dayHistory: {},
+          notes: {},
+          startDate: new Date().toISOString(),
           lastUpdated: new Date().toISOString(),
         };
         setDoc(userDocRef, initialData, { merge: true });
@@ -61,7 +69,6 @@ export function useFirebaseData(userId) {
     const dayKey = String(userData.currentDay);
     const allDone = completedCount === 7;
 
-    // completedDays ve dayHistory güncelle
     const newCompletedDays = { ...userData.completedDays };
     const newDayHistory = { ...userData.dayHistory, [dayKey]: newProgress };
     if (allDone) newCompletedDays[dayKey] = true;
@@ -89,11 +96,22 @@ export function useFirebaseData(userId) {
     }
   };
 
-  // Günü tamamla ve sonraki güne geç
+  const saveNote = async (text) => {
+    if (!userId) return;
+    const dayKey = String(userData.currentDay);
+    const newNotes = { ...userData.notes, [dayKey]: text };
+    setUserData(prev => ({ ...prev, notes: newNotes }));
+    try {
+      await updateDoc(doc(db, 'users', userId), { notes: newNotes });
+    } catch (e) {
+      console.error('Note save error:', e);
+    }
+  };
+
   const completeDay = async () => {
     if (!userId || userData.progress < 100) return;
     const nextDay = Math.min((userData.currentDay || 1) + 1, 75);
-    const freshTasks = { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false, 7: false };
+    const freshTasks = { ...EMPTY_TASKS };
 
     setUserData(prev => ({
       ...prev,
@@ -115,5 +133,5 @@ export function useFirebaseData(userId) {
     }
   };
 
-  return { userData, loading, toggleTask, completeDay };
+  return { userData, loading, toggleTask, completeDay, saveNote };
 }

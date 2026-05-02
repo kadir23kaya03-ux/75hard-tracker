@@ -76,6 +76,8 @@ export default function Login({ onLogin }) {
         currentDay: 1,
         progress: 0,
         tasks: { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false, 7: false },
+        notes: {},
+        startDate: new Date().toISOString(),
         createdAt: new Date().toISOString(),
       };
       await setDoc(doc(db, 'users', id), profileData);

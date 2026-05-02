@@ -5,7 +5,8 @@ import {
   Check, LogOut, Trophy, Users, Flame,
   Droplets, BookOpen, Dumbbell, Footprints,
   Utensils, Camera, Shield, Target, Home,
-  CalendarDays, BarChart2, ChevronRight, Pill
+  CalendarDays, BarChart2, ChevronRight, Pill,
+  Zap, NotebookPen, CalendarCheck
 } from 'lucide-react';
 import Workouts from '../components/Workouts';
 import Calendar75 from '../components/Calendar75';
@@ -31,11 +32,34 @@ const NAV = [
   { id: 'leaderboard', label: 'Rankings',   icon: Trophy },
 ];
 
+function calcStreak(completedDays, currentDay, progress) {
+  let streak = 0;
+  const startFrom = progress === 100 ? currentDay : currentDay - 1;
+  for (let d = startFrom; d >= 1; d--) {
+    if (completedDays[String(d)]) streak++;
+    else break;
+  }
+  return streak;
+}
+
+function formatDate(iso) {
+  if (!iso) return null;
+  return new Date(iso).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
 export default function Dashboard({ user, onLogout }) {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('daily');
-  const { userData, loading: userLoading, toggleTask, completeDay } = useFirebaseData(user?.id);
+  const [noteText, setNoteText] = useState('');
+  const [noteSaved, setNoteSaved] = useState(false);
+  const { userData, loading: userLoading, toggleTask, completeDay, saveNote } = useFirebaseData(user?.id);
   const { squad, loading: squadLoading } = useSquadData();
+
+  React.useEffect(() => {
+    const dayKey = String(userData.currentDay);
+    setNoteText(userData.notes?.[dayKey] || '');
+    setNoteSaved(false);
+  }, [userData.currentDay, userData.notes]);
 
   if (userLoading) {
     return (
@@ -45,6 +69,8 @@ export default function Dashboard({ user, onLogout }) {
     );
   }
 
+  const streak = calcStreak(userData.completedDays, userData.currentDay, userData.progress);
+  const startDateStr = formatDate(userData.startDate);
   const sorted = [...squad].sort((a, b) => (b.progress || 0) - (a.progress || 0));
 
   /* ── TAB CONTENT ── */
@@ -64,6 +90,20 @@ export default function Dashboard({ user, onLogout }) {
                 className="h-full bg-red-600 transition-all duration-500 shadow-[0_0_10px_rgba(220,38,38,0.5)]"
                 style={{ width: `${userData.progress}%` }}
               />
+            </div>
+            {/* Streak + Start Date */}
+            <div className="flex items-center gap-4 mt-4 pt-4 border-t border-[#222]">
+              <div className="flex items-center gap-1.5">
+                <Zap className="w-4 h-4 text-red-500" fill="currentColor" />
+                <span className="text-xs font-bold text-white tracking-widest uppercase">{streak} GÜN</span>
+                <span className="text-[10px] text-gray-500 uppercase tracking-widest">Streak</span>
+              </div>
+              {startDateStr && (
+                <div className="flex items-center gap-1.5 ml-auto">
+                  <CalendarCheck className="w-4 h-4 text-gray-500" />
+                  <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{startDateStr}</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -102,6 +142,26 @@ export default function Dashboard({ user, onLogout }) {
                 </motion.button>
               );
             })}
+          </div>
+
+          {/* Günlük Not */}
+          <div className="border border-[var(--color-dark-border)] bg-[var(--color-dark-card)] overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[#222]">
+              <div className="flex items-center gap-2 text-xs font-bold text-gray-500 uppercase tracking-widest">
+                <NotebookPen className="w-4 h-4" /> Günlük Not
+              </div>
+              {noteSaved && (
+                <span className="text-[10px] text-green-500 font-bold uppercase tracking-widest">Kaydedildi ✓</span>
+              )}
+            </div>
+            <textarea
+              value={noteText}
+              onChange={e => { setNoteText(e.target.value); setNoteSaved(false); }}
+              onBlur={() => { saveNote(noteText); setNoteSaved(true); }}
+              placeholder="Bugün nasıl geçti? Notlarını buraya yaz..."
+              rows={3}
+              className="w-full bg-transparent px-4 py-3 text-sm text-gray-300 placeholder-gray-600 resize-none outline-none font-mono leading-relaxed"
+            />
           </div>
 
           {/* Progress Chart */}
