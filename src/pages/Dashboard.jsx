@@ -55,6 +55,7 @@ export default function Dashboard({ user, onLogout }) {
   const [noteSaved, setNoteSaved] = useState(false);
   const { userData, loading: userLoading, toggleTask, completeDay, saveNote } = useFirebaseData(user?.id);
   const { squad, loading: squadLoading } = useSquadData();
+  const { permission, requestPermission, sendTestNotification } = useNotifications(userData.progress);
 
   React.useEffect(() => {
     const dayKey = String(userData.currentDay);
@@ -73,7 +74,6 @@ export default function Dashboard({ user, onLogout }) {
   const streak = calcStreak(userData.completedDays, userData.currentDay, userData.progress);
   const startDateStr = formatDate(userData.startDate);
   const sorted = [...squad].sort((a, b) => (b.progress || 0) - (a.progress || 0));
-  const { permission, requestPermission, sendTestNotification } = useNotifications(userData.progress);
 
   /* ── TAB CONTENT ── */
   const TabContent = () => (
