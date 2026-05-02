@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { doc, onSnapshot, setDoc, updateDoc } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { db, storage } from '../config/firebase';
 
 const EMPTY_TASKS = { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false, 7: false };
 
@@ -13,9 +14,11 @@ export function useFirebaseData(userId) {
     completedDays: {},
     dayHistory: {},
     notes: {},
+    photos: {},
     startDate: null,
   });
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (!userId) return;
@@ -33,6 +36,7 @@ export function useFirebaseData(userId) {
           completedDays: data.completedDays || {},
           dayHistory: data.dayHistory || {},
           notes: data.notes || {},
+          photos: data.photos || {},
           startDate: data.startDate || null,
           ...data,
         });
@@ -45,6 +49,7 @@ export function useFirebaseData(userId) {
           completedDays: {},
           dayHistory: {},
           notes: {},
+          photos: {},
           startDate: new Date().toISOString(),
           lastUpdated: new Date().toISOString(),
         };
@@ -133,5 +138,23 @@ export function useFirebaseData(userId) {
     }
   };
 
-  return { userData, loading, toggleTask, completeDay, saveNote };
+  const uploadPhoto = async (file) => {
+    if (!userId || !file) return;
+    setUploading(true);
+    try {
+      const dayKey = String(userData.currentDay);
+      const storageRef = ref(storage, `photos/${userId}/day_${dayKey}`);
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+      const newPhotos = { ...userData.photos, [dayKey]: url };
+      setUserData(prev => ({ ...prev, photos: newPhotos }));
+      await updateDoc(doc(db, 'users', userId), { photos: newPhotos });
+    } catch (e) {
+      console.error('Photo upload error:', e);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return { userData, loading, uploading, toggleTask, completeDay, saveNote, uploadPhoto };
 }

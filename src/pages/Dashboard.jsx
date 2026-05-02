@@ -6,7 +6,8 @@ import {
   Droplets, BookOpen, Dumbbell, Footprints,
   Utensils, Camera, Shield, Target, Home,
   CalendarDays, BarChart2, ChevronRight, Pill,
-  Zap, NotebookPen, CalendarCheck, Bell, BellOff
+  Zap, NotebookPen, CalendarCheck, Bell, BellOff,
+  Upload, ImageIcon, Loader2
 } from 'lucide-react';
 import Workouts from '../components/Workouts';
 import Calendar75 from '../components/Calendar75';
@@ -53,7 +54,7 @@ export default function Dashboard({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState('daily');
   const [noteText, setNoteText] = useState('');
   const [noteSaved, setNoteSaved] = useState(false);
-  const { userData, loading: userLoading, toggleTask, completeDay, saveNote } = useFirebaseData(user?.id);
+  const { userData, loading: userLoading, uploading, toggleTask, completeDay, saveNote, uploadPhoto } = useFirebaseData(user?.id);
   const { squad, loading: squadLoading } = useSquadData();
   const { permission, requestPermission, sendTestNotification } = useNotifications(userData.progress);
 
@@ -165,6 +166,44 @@ export default function Dashboard({ user, onLogout }) {
               className="w-full bg-transparent px-4 py-3 text-sm text-gray-300 placeholder-gray-600 resize-none outline-none font-mono leading-relaxed"
             />
           </div>
+
+          {/* İlerleme Fotoğrafı */}
+          {(() => {
+            const dayKey = String(userData.currentDay);
+            const photoUrl = userData.photos?.[dayKey];
+            return (
+              <div className="border border-[var(--color-dark-border)] bg-[var(--color-dark-card)] overflow-hidden">
+                <div className="flex items-center justify-between px-4 py-3 border-b border-[#222]">
+                  <div className="flex items-center gap-2 text-xs font-bold text-gray-500 uppercase tracking-widest">
+                    <Camera className="w-4 h-4" /> İlerleme Fotoğrafı — Gün {userData.currentDay}
+                  </div>
+                </div>
+                {photoUrl ? (
+                  <div className="relative">
+                    <img src={photoUrl} alt={`Gün ${userData.currentDay}`} className="w-full max-h-72 object-cover" />
+                    <label className="absolute bottom-3 right-3 cursor-pointer bg-black/70 hover:bg-black/90 border border-[#333] px-3 py-1.5 flex items-center gap-1.5 transition-colors">
+                      <Upload className="w-3 h-3 text-gray-400" />
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Değiştir</span>
+                      <input type="file" accept="image/*" className="hidden" onChange={e => e.target.files[0] && uploadPhoto(e.target.files[0])} />
+                    </label>
+                  </div>
+                ) : (
+                  <label className={`flex flex-col items-center justify-center py-10 cursor-pointer border-2 border-dashed border-[#262626] hover:border-red-600/40 transition-colors mx-4 mb-4 mt-3 ${uploading ? 'pointer-events-none opacity-50' : ''}`}>
+                    {uploading ? (
+                      <Loader2 className="w-8 h-8 text-red-500 animate-spin mb-3" />
+                    ) : (
+                      <ImageIcon className="w-8 h-8 text-gray-600 mb-3" />
+                    )}
+                    <span className="text-xs font-bold uppercase tracking-widest text-gray-500">
+                      {uploading ? 'Yükleniyor...' : 'Fotoğraf Ekle'}
+                    </span>
+                    <span className="text-[10px] text-gray-600 mt-1">Dokunarak seç</span>
+                    <input type="file" accept="image/*" className="hidden" onChange={e => e.target.files[0] && uploadPhoto(e.target.files[0])} disabled={uploading} />
+                  </label>
+                )}
+              </div>
+            );
+          })()}
 
           {/* Bildirim Kartı */}
           {permission !== 'unsupported' && (
